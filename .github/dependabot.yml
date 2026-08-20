@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Keeps the workflow actions current; without this they silently age out.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+
+  # Only the test harness has dependencies — the site itself has none installed.
+  # React and Leaflet are pinned here to the exact versions the pages request
+  # from unpkg, so a bump will fail the smoke test until the URLs in the HTML
+  # (and CDN_MAP in tests/smoke.mjs) move with it. That failure is the point:
+  # it is the reminder to upgrade the site, not just the test.
+  - package-ecosystem: npm
+    directory: /tests
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: test
