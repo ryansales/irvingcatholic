@@ -130,6 +130,70 @@ def geocode(address):
 
 # --------------------------------------------------------------------------
 
+DIRECTIONALS = {"n", "s", "e", "w", "ne", "nw", "se", "sw"}
+
+# Street-type abbreviations seen in this data, mapped to one spelling each.
+STREET_TYPES = {
+    "street": "st", "road": "rd", "drive": "dr", "court": "ct", "lane": "ln",
+    "avenue": "ave", "av": "ave", "boulevard": "blvd", "freeway": "fwy",
+    "highway": "hwy", "parkway": "pkwy", "place": "pl", "circle": "cir",
+    "terrace": "ter", "trail": "trl", "way": "way", "cove": "cv",
+}
+
+SUITE = re.compile(r"(?:\b(?:ste|suite|apt|unit|bldg|building|floor|fl)\b|#)\s*[\w-]*")
+
+
+def address_key(address):
+    """A key that is equal for two spellings of the same street address.
+
+    Two rows can name one building differently — "511 E John W Carpenter Fwy"
+    and "511 E John Carpenter Fwy" are the same door — and a street-centreline
+    geocoder happily returns two points a few hundred metres apart for them.
+    Normalising to a shared key means one lookup answers for both, so listings
+    in one building can never end up with different pins.
+
+    What gets normalised, each case drawn from something in this actual data:
+
+    - suite, unit, and "#500" fragments are dropped: same building, same point
+    - apostrophes close up, so O'Connor and OConnor agree
+    - street types collapse to one spelling, so St and Street agree
+    - stray single letters inside the street name are middle initials and go,
+      but a leading directional stays: E Main St and W Main St are two roads
+    """
+    text = address.lower().replace("'", "").replace("\u2019", "")
+    text = SUITE.sub(" ", text)
+    text = re.sub(r"[^a-z0-9]+", " ", text).strip()
+    tokens = text.split()
+    kept = []
+    for i, token in enumerate(tokens):
+        # index 0 is the house number, so index 1 is where a directional lives
+        if len(token) == 1 and not (i == 1 and token in DIRECTIONALS):
+            continue
+        kept.append(STREET_TYPES.get(token, token))
+    return " ".join(kept)
+
+
+def has_directional(key):
+    """True when a normalised key names a directional, as in "511 e john ..."."""
+    tokens = key.split()
+    return len(tokens) > 1 and tokens[1] in DIRECTIONALS
+
+
+def loose_key(address):
+    """address_key with any leading directional removed.
+
+    Some rows drop the directional altogether — directory-data.js carries
+    "511 John W. Carpenter Fwy Suite 500" for the same door another row calls
+    "511 E John W Carpenter Fwy #500". Matching on this is only safe when it
+    is unambiguous, so main() consults it only when exactly one known address
+    reduces to the same loose key.
+    """
+    tokens = address_key(address).split()
+    if len(tokens) > 1 and tokens[1] in DIRECTIONALS:
+        del tokens[1]
+    return " ".join(tokens)
+
+
 def slug(name):
     s = re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
     return re.sub(r"-+", "-", s)
@@ -143,14 +207,46 @@ def main():
         rows = list(csv.DictReader(fh))
 
     failures = []
+
+    # A row whose Geocoder column reads "manual" was placed by hand because a
+    # geocoder got it wrong. Seed the cache with those first so they win for
+    # every row at the same address, and so re-running never overwrites them.
+    cache = {}
+    for row in rows:
+        if row.get("Geocoder", "").strip().lower() == "manual" and row.get("lat"):
+            cache[address_key(row["Address"])] = (
+                float(row["lat"]), float(row["lng"]), "set by hand", "manual",
+            )
+
     for row in rows:
         address = row["Address"]
-        result, err = geocode(address)
-        if not result:
-            failures.append((row["Business"], err))
-            print(f"  MISS  {row['Business']}\n        {address}\n        {err}")
-            continue
-        lat, lng, matched, source = result
+        key = address_key(address)
+
+        hit = cache.get(key)
+        if hit is None and not has_directional(key):
+            # No exact match, and this row names no directional — it may still
+            # be the same door as one that does. Only trust that when exactly
+            # one known address reduces to the same loose key. A row that does
+            # name a directional never falls back: E Main St must not borrow
+            # the coordinate of W Main St.
+            loose = loose_key(address)
+            candidates = {k: v for k, v in cache.items() if loose_key(k) == loose}
+            if len(candidates) == 1:
+                hit = next(iter(candidates.values()))
+
+        if hit is not None:
+            lat, lng, matched, source = hit
+            if row.get("Geocoder", "").strip().lower() != "manual":
+                source = f"{source} (same address)"
+        else:
+            result, err = geocode(address)
+            if not result:
+                failures.append((row["Business"], err))
+                print(f"  MISS  {row['Business']}\n        {address}\n        {err}")
+                continue
+            lat, lng, matched, source = result
+            cache[key] = result
+
         row["lat"], row["lng"] = f"{lat}", f"{lng}"
         row["Geocoder"] = source
         ok = inside(lat, lng, boundary)
