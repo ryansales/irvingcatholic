@@ -7,7 +7,7 @@
 */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadDirectory, createReport, repoRoot } from './lib/load-directory.mjs';
+import { loadDirectory, createReport, siteRoot } from './lib/load-directory.mjs';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -141,7 +141,7 @@ for (const [index, r] of resources.entries()) {
     void i;
     if (typeof value !== 'string' || !value.trim()) {
       report.error(where, `${field} must be a path, a URL, or null`);
-    } else if (!/^https?:\/\//i.test(value) && !existsSync(join(repoRoot, value.replace(/^\.?\//, '')))) {
+    } else if (!/^https?:\/\//i.test(value) && !existsSync(join(siteRoot, value.replace(/^\.?\//, '')))) {
       report.error(where, `${field} "${value}" does not exist in the repo`);
     }
   }

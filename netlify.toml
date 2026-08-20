@@ -1,35 +1,18 @@
 [build]
-  publish = "."
+  # Publish site/, not the repo root. Everything a visitor can reach lives in
+  # that one folder; the README, the SEO notes in docs/, the checks in
+  # scripts/ and tests/, the raw research in review/, and the .dc.html design
+  # sources all sit above it and are therefore never served. That boundary
+  # replaces the per-file X-Robots-Tag and robots.txt allowlist this file used
+  # to carry — a new doc or research file is out of the deploy by default
+  # instead of by remembering to add a rule.
+  publish = "site"
 
 [[redirects]]
   from = "https://www.irving-catholic.net/*"
   to = "https://irving-catholic.net/:splat"
   status = 301
   force = true
-
-# The design-source files and the handoff doc are published alongside the site
-# (publish = "."), so they are reachable URLs that duplicate the real pages.
-# robots.txt asks crawlers not to fetch them; X-Robots-Tag keeps them out of
-# the index even when something links to them directly.
-[[headers]]
-  for = "/Home.dc.html"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow"
-
-[[headers]]
-  for = "/Resource Detail.dc.html"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow"
-
-[[headers]]
-  for = "/README.md"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow"
-
-[[headers]]
-  for = "/todo.md"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow"
 
 [[headers]]
   for = "/images/*"

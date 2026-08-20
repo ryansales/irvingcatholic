@@ -6,10 +6,13 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
+// Netlify publishes site/, so both the data file and the sitemap it produces
+// live there — the sitemap has to be served from the deploy root to be valid.
+const SITE_DIR = path.join(ROOT, 'site');
 const SITE = 'https://irving-catholic.net';
 
 global.window = {};
-require(path.join(ROOT, 'directory-data.js'));
+require(path.join(SITE_DIR, 'directory-data.js'));
 const data = global.window.IRVING_DIRECTORY;
 
 // Placeholder listings are stand-ins for real businesses; keep them out of the
@@ -34,5 +37,5 @@ const body = [
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 
-fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), xml);
-console.log(`sitemap.xml: ${listings.length + 1 + STATIC_PAGES.length} URLs (${data.resources.length - listings.length} placeholder listing(s) skipped)`);
+fs.writeFileSync(path.join(SITE_DIR, 'sitemap.xml'), xml);
+console.log(`site/sitemap.xml: ${listings.length + 1 + STATIC_PAGES.length} URLs (${data.resources.length - listings.length} placeholder listing(s) skipped)`);

@@ -8,7 +8,14 @@ import vm from 'node:vm';
 
 export const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-export function loadDirectory(file = join(repoRoot, 'directory-data.js')) {
+/* The published directory. Netlify serves this folder as the web root, so a
+   URL path like "/favicon.svg" resolves against siteRoot, not repoRoot — the
+   two are different since the docs, checks, and design sources moved out of
+   the deploy. Anything reachable by a visitor lives under here; anything
+   under repoRoot but outside it is repo-only and never ships. */
+export const siteRoot = join(repoRoot, 'site');
+
+export function loadDirectory(file = join(siteRoot, 'directory-data.js')) {
   const source = readFileSync(file, 'utf8');
   const sandbox = { window: {} };
   vm.createContext(sandbox);

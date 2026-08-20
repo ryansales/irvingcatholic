@@ -31,7 +31,7 @@ jobs:
       - name: Syntax-check every JavaScript file
         run: |
           shopt -s nullglob
-          for file in *.js tools/*.js scripts/*.mjs scripts/lib/*.mjs tests/*.mjs; do
+          for file in site/*.js design/*.js tools/*.js scripts/*.mjs scripts/lib/*.mjs tests/*.mjs tests/lib/*.mjs; do
             echo "checking $file"
             node --check "$file"
           done
