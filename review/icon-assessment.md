@@ -265,16 +265,35 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 
 ---
 
+## The copy pass — what is sourced, and what is still open
+
+All ten listings are now in `directory-data.js` with a `blurb` and a `description`, written from each
+business's own site, its chamber and directory records, and its social pages. Where a fact could not
+be sourced it was left out, and optional fields were left blank rather than filled in with guesses:
+seven of the ten have no `hours`, and Klassen Plumbing has no `website` because none was found.
+
+Four things surfaced during the research that need your call.
+
+| Question | What was found |
+|---|---|
+| **Dr. Ohlenforst has retired** | The practice's own site says he founded it, served Irving for decades, and is now retired; it is led by Dr. Nick Ward, who grew up in Irving. The listing is renamed **Ward Orthodontics** (id `ward-orthodontics`) since that is what it trades as now. The ICON sheet recommends Dr. Ohlenforst by name, so the recommendation may want revisiting. |
+| **Texas Mercy has two addresses** | Texas Mercy Headache and Pain sits at 4950 N O'Connor Ste 203 — the ICON sheet's address, and the one pinned. Texas Mercy Medical Clinic is listed at 4925 N O'Connor Ste 105-A, across the street, verified as recently as July 2026. Both name Dr. Lance Hoover. Worth one call to confirm which door patients use. |
+| **Klassen Plumbing has three addresses** | 118 S Main St (pinned), 125 S Jefferson St, and 716 Knight Ln all appear in current directory records under the same phone number. The description avoids naming a street for that reason. |
+| **Eileen Kainer or Eileen King?** | The ICON sheet says Kainer; the practice's own pages and two directories say "Eileen King, RN, BSN". Rather than pick, the Neuro Integration Services description names no practitioner. |
+
+Two smaller notes. The Neuro Integration Services description explains NIS as what its practitioners
+do rather than asserting that it works — the site should not be making clinical claims on a
+listing's behalf. And Rohter & Company's "best in Irving" awards are attributed as local *Best of*
+awards, which is what the sources actually support.
+
 ## What's left before List 1 goes live
 
-1. Paste `review/list-1-geocoded.js` into `resources` in `directory-data.js` — the coordinates are
-   done. (Re-run the **Geocode List 1 addresses** workflow from the Actions tab only if an address
-   changes; it leaves the two `manual` rows alone.)
-2. Write a one-line `blurb` and a short `description` for each. The ICON comments are good raw
-   material and several are directly quotable.
-3. Confirm each business wants to be listed — especially the four medical practices, which did not
-   submit themselves.
-4. Replace the three `EXAMPLE ONLINE LISTING` placeholders as the first real no-storefront entries land.
+1. ~~Paste the listings into `directory-data.js`~~ — done, with coordinates and copy.
+2. ~~Write a `blurb` and a `description` for each~~ — done; see the copy pass above.
+3. Answer the four open questions in the table above.
+4. Confirm each business wants to be listed — especially the four medical practices, which did not
+   submit themselves. Nothing here was submitted by the businesses.
+5. Replace the three `EXAMPLE ONLINE LISTING` placeholders as the first real no-storefront entries land.
 
 ## Files
 
