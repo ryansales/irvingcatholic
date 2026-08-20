@@ -196,11 +196,14 @@ def main():
         + ",\n".join(json.dumps(o, indent=2) for o in objects)
         + ",\n"
     )
-    with open(SNIPPET_PATH, "w", encoding="utf-8") as fh:
-        fh.write(snippet)
-    print(f"Wrote paste-ready listings to {os.path.relpath(SNIPPET_PATH, ROOT)}\n")
-    print("--- paste into the `resources` array in directory-data.js ---\n")
-    print(snippet)
+    if objects:
+        with open(SNIPPET_PATH, "w", encoding="utf-8") as fh:
+            fh.write(snippet)
+        print(f"Wrote paste-ready listings to {os.path.relpath(SNIPPET_PATH, ROOT)}\n")
+        print("--- paste into the `resources` array in directory-data.js ---\n")
+        print(snippet)
+    else:
+        print("No addresses resolved, so no listing snippet was written.")
 
     if failures:
         print("\nNeeds a look:")

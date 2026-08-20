@@ -28,13 +28,13 @@ jobs:
 
       - name: Commit results
         run: |
-          if git diff --quiet -- review/; then
-            echo "No changes to commit."
+          if [ -z "$(git status --porcelain -- review/)" ]; then
+            echo "Nothing changed under review/ — no coordinates to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add review/list-1-physical-irving.csv review/list-1-geocoded.js
+          git add -A review/
           git commit -m "Geocode List 1 addresses"
           git push
 

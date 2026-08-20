@@ -72,12 +72,15 @@ OpenStreetMap itself all return 403 at the proxy; `maps.googleapis.com` is reach
 keyless requests. Web search is not a substitute: it returned nothing for six of the nine addresses
 and unverifiable numbers for the rest, and a wrong pin on a live map is worse than a missing one.
 
-So the geocoding runs on GitHub Actions instead — no local machine, no terminal, all browser:
+So the geocoding runs on GitHub Actions instead — no local machine, no terminal, all browser.
+**Merge this PR first:** GitHub only lists a manually-triggered workflow once the workflow file is on
+the default branch. After the merge:
 
 1. Open the repo on github.com and click the **Actions** tab.
 2. Pick **Geocode List 1 addresses** in the left sidebar.
 3. Click **Run workflow**, choose the branch `claude/irving-business-assessment-ne2iuq`,
-   and press the green **Run workflow** button.
+   and press the green **Run workflow** button. (After the merge you can run it against `main`
+   directly; the branch picker matters only if you keep working on a branch.)
 
 The runner has normal internet access, so it geocodes all ten addresses (US Census geocoder first,
 Nominatim as fallback — both free, neither needs a key) and commits two files back to the branch:
