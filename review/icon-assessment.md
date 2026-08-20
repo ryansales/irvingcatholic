@@ -72,34 +72,43 @@ OpenStreetMap itself all return 403 at the proxy; `maps.googleapis.com` is reach
 keyless requests. Web search is not a substitute: it returned nothing for six of the nine addresses
 and unverifiable numbers for the rest, and a wrong pin on a live map is worse than a missing one.
 
-So the geocoding runs on GitHub Actions instead — no local machine, no terminal, all browser.
-**Merge this PR first:** GitHub only lists a manually-triggered workflow once the workflow file is on
-the default branch. After the merge:
+So the geocoding runs on GitHub Actions instead — no local machine, no terminal, all browser:
 
 1. Open the repo on github.com and click the **Actions** tab.
 2. Pick **Geocode List 1 addresses** in the left sidebar.
-3. Click **Run workflow**, choose the branch `claude/irving-business-assessment-ne2iuq`,
-   and press the green **Run workflow** button. (After the merge you can run it against `main`
-   directly; the branch picker matters only if you keep working on a branch.)
+3. Click **Run workflow**, leave the branch on `main`, and press the green **Run workflow** button.
+4. When it finishes, open the run and click **Open the pull request** in the run summary. Let the
+   checks go green and merge it.
 
 The runner has normal internet access, so it geocodes all ten addresses (US Census geocoder first,
-Nominatim as fallback — both free, neither needs a key) and commits two files back to the branch:
+Nominatim as fallback — both free, neither needs a key) and puts two files on a branch of its own:
 
 - `review/list-1-physical-irving.csv` — now with `lat`, `lng`, which geocoder answered, and an
   `In Irving` column
 - `review/list-1-geocoded.js` — the ten listing objects, ready to paste into the `resources` array
   in `directory-data.js`
 
+**Why step 4 exists.** The repository rules require every change to `main` to arrive through a pull
+request with its required checks green, so the job cannot push its results to `main` — the first run
+was rejected with *"Changes must be made through a pull request."* The results go to their own
+branch instead, and the run summary links straight to the pull request form for it.
+
+The link is deliberate rather than the job opening the pull request itself. A pull request created
+with the workflow's own `GITHUB_TOKEN` does not start CI, so the two required checks would sit
+unstarted and it could never be merged. Clicking the link takes one second and CI runs normally.
+
 Every result is checked against the 201-point municipal boundary already in `directory-data.js` and
 flagged `NO - CHECK` if it lands outside. That check is tested and working: all 24 existing Irving
 listings pass it, and Coppell, Dallas, Fort Worth, Flower Mound, and the DFW Airport centroid are all
-correctly rejected. If an address misses or lands outside the boundary, the run still commits the
-coordinates that did resolve and leaves a warning on the run summary naming the ones to look at.
+correctly rejected. If an address misses or lands outside the boundary, whatever did resolve is still
+pushed and the run summary warns, naming what to look at. The results are also attached to the run as
+a `geocode-results` artifact, so a rejected push can never lose them again.
 
 The script itself is `review/geocode.py` if you ever do want to run it directly. It has been tested
-end to end against mocked geocoder responses — census hit, census miss falling through to Nominatim,
-census unreachable falling through to Nominatim, and an out-of-boundary result — so the first real
-run should not be its first exercise.
+end to end against mocked geocoder responses — census answers everything, census misses and Nominatim
+answers, census unreachable and Nominatim answers, an out-of-boundary result, and both geocoders
+unreachable — and the branch-and-push step was rehearsed against a local clone, including a re-run
+overwriting its own branch.
 
 Address-level sanity in the meantime: all ten sit in core Irving ZIPs — 75039, 75060, 75061, 75062 —
 none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
@@ -241,8 +250,9 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 
 ## What's left before List 1 goes live
 
-1. Run the **Geocode List 1 addresses** workflow from the Actions tab, then paste
-   `review/list-1-geocoded.js` into `resources` in `directory-data.js`. Rows 5 and 8 can reuse
+1. Run the **Geocode List 1 addresses** workflow from the Actions tab, merge the pull request it
+   links from the run summary, then paste `review/list-1-geocoded.js` into `resources` in
+   `directory-data.js`. Rows 5 and 8 can reuse
    32.884692, -96.949608 if you would rather not wait on the geocoder for those two.
 2. Write a one-line `blurb` and a short `description` for each. The ICON comments are good raw
    material and several are directly quotable.

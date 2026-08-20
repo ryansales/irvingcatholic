@@ -536,7 +536,7 @@
   <section>
     <div class="sec-head">
       <span class="sec-tag" style="--tone: var(--hold)">Geocoding</span>
-      <h2>The coordinates come from a workflow you click, not from me</h2>
+      <h2>The coordinates come from a workflow, not from me</h2>
       <p class="sec-note">
         I could not geocode from this session. The egress policy blocks every geocoding host &mdash; the
         US Census geocoder, Nominatim, Photon, Geoapify, ArcGIS, the City of Irving's own GIS server,
@@ -546,37 +546,39 @@
       <p class="sec-note">
         Web search is not a substitute. It returned nothing for six of the nine addresses and
         unverifiable numbers for the rest &mdash; and a wrong pin on a live map is worse than a missing
-        one. So the geocoding runs on GitHub Actions instead: no local machine, no terminal, all
-        browser.
+        one. So it runs on GitHub Actions instead: no local machine, no terminal, all browser.
       </p>
     </div>
     <ol class="steps">
       <li>Open the repo on github.com and click the <strong>Actions</strong> tab.</li>
       <li>Pick <strong>Geocode List 1 addresses</strong> in the left sidebar.</li>
-      <li>Click <strong>Run workflow</strong>, choose the branch <code>claude/irving-business-assessment-ne2iuq</code>, and press the green <strong>Run workflow</strong> button.</li>
+      <li>Click <strong>Run workflow</strong>, leave the branch on <code>main</code>, and press the green button.</li>
+      <li>When it finishes, open the run and click <strong>Open the pull request</strong> in the run summary. Let the checks go green, then merge.</li>
     </ol>
     <p class="sec-note">
-      The runner has normal internet access, so it geocodes all ten addresses &mdash; US Census
-      geocoder first, Nominatim as fallback, neither needs an API key &mdash; and commits two files
-      back to the branch: <code>review/list-1-physical-irving.csv</code> with <code>lat</code>,
-      <code>lng</code>, the geocoder that answered, and an <code>In Irving</code> column; and
-      <code>review/list-1-geocoded.js</code>, the ten listing objects ready to paste into
-      <code>resources</code>.
-    </p>
-    <p class="sec-note">
-      Every result is checked against the 201-point municipal boundary already in
-      <code>directory-data.js</code> and flagged if it lands outside. That check is tested and working:
-      all 24 existing Irving listings pass it, and Coppell, Dallas, Fort Worth, Flower Mound, and the
-      DFW Airport centroid are all correctly rejected. If an address misses or lands outside the
-      boundary, the run still commits the coordinates that did resolve and leaves a warning on the run
-      summary naming the ones to look at.
+      The runner geocodes all ten addresses &mdash; US Census geocoder first, Nominatim as fallback,
+      neither needs an API key &mdash; and puts two files on a branch of its own:
+      <code>review/list-1-physical-irving.csv</code> with the coordinates, which geocoder answered, and
+      an <code>In Irving</code> column; and <code>review/list-1-geocoded.js</code> with listing objects
+      ready to paste into <code>resources</code>.
     </p>
     <div class="callout" style="--tone: var(--hold)">
-      <strong>The script has already been exercised.</strong> <code>review/geocode.py</code> was tested
-      end to end against mocked geocoder responses &mdash; census hit, census miss falling through to
-      Nominatim, census unreachable falling through to Nominatim, and an out-of-boundary result &mdash;
-      so the first real run will not be its first exercise.
+      <strong>Why there is a pull request step.</strong> The repository rules require every change to
+      <code>main</code> to arrive through a pull request with its checks green, so the job cannot push
+      its own results &mdash; the first run was rejected with <em>"Changes must be made through a pull
+      request."</em> The results go to their own branch instead, and the run summary links straight to
+      the pull request form. The link is deliberate rather than the job opening the pull request
+      itself: a pull request created with the workflow's own token does not start CI, so its two
+      required checks would sit unstarted and it could never be merged.
     </div>
+    <p class="sec-note">
+      Every result is checked against the 201-point municipal boundary already in
+      <code>directory-data.js</code> and flagged <code>NO - CHECK</code> if it lands outside. That check
+      is tested and working: all 24 existing Irving listings pass it, and Coppell, Dallas, Fort Worth,
+      Flower Mound, and the DFW Airport centroid are all correctly rejected. Anything that misses is
+      named in the run summary, and the results are attached to the run as an artifact too, so a
+      rejected push can never lose them again.
+    </p>
     <p class="sec-note">
       Address-level sanity in the meantime: all ten sit in core Irving ZIPs &mdash; 75039, 75060, 75061,
       75062 &mdash; none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
