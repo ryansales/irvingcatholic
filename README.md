@@ -34,6 +34,7 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `sitemap.xml` | Generated — run `node tools/generate-sitemap.js` after adding or removing a listing |
 | `tools/generate-sitemap.js` | Regenerates `sitemap.xml`. Run by hand; **not** a build step |
 | `favicon.svg` | Brand-red rounded square with the ✦ mark |
+| `todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
 | `netlify.toml` | `publish = "."`, a 301 from `www` to the bare domain, `X-Robots-Tag: noindex` on the design-source files and README, and a long cache on `/images/*` |
 | `robots.txt` | Allows all except the design-source files, README, and `/tools/`; points at `sitemap.xml` |
 

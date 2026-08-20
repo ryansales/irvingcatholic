@@ -5,6 +5,7 @@ Allow: /
 Disallow: /Home.dc.html
 Disallow: /Resource%20Detail.dc.html
 Disallow: /README.md
+Disallow: /todo.md
 Disallow: /tools/
 
 Sitemap: https://irving-catholic.net/sitemap.xml
