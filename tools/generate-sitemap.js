@@ -21,13 +21,18 @@ const url = (loc, priority, changefreq) =>
   `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n` +
   `    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
 
+// The form pages are real destinations people search for ("suggest a Catholic
+// business Irving"). thanks.html is deliberately absent — it is noindex.
+const STATIC_PAGES = ['suggest.html', 'update.html', 'contact.html'];
+
 const body = [
   url(`${SITE}/`, '1.0', 'weekly'),
-  ...listings.map(r => url(`${SITE}/listing.html?id=${r.id}`, '0.8', 'monthly'))
+  ...listings.map(r => url(`${SITE}/listing.html?id=${r.id}`, '0.8', 'monthly')),
+  ...STATIC_PAGES.map(p => url(`${SITE}/${p}`, '0.5', 'yearly'))
 ].join('\n');
 
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
   `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 
 fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), xml);
-console.log(`sitemap.xml: ${listings.length + 1} URLs (${data.resources.length - listings.length} placeholder listing(s) skipped)`);
+console.log(`sitemap.xml: ${listings.length + 1 + STATIC_PAGES.length} URLs (${data.resources.length - listings.length} placeholder listing(s) skipped)`);

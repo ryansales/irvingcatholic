@@ -1,0 +1,799 @@
+<title>ICON List Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..400&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap">
+
+<style>
+  :root {
+    --ground: #F4EFE5;
+    --panel: #FFFFFF;
+    --panel-soft: #FBF8F1;
+    --ink: #2B2620;
+    --body: #4D463C;
+    --secondary: #6B6356;
+    --muted: #8A8073;
+    --rule: #E2DBCC;
+    --rule-soft: #F0EBE1;
+    --accent: #BF4A3C;
+    --map: #3F5A8C;
+    --online: #2F7D8C;
+    --hold: #8A6B2E;
+    --drop: #A2554A;
+    --gold: #C2882E;
+    --shadow: 0 4px 16px rgba(60, 45, 30, .07);
+    --shadow-lift: 0 10px 30px rgba(60, 45, 30, .10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #1B1815;
+      --panel: #242019;
+      --panel-soft: #2A251E;
+      --ink: #F1E9DA;
+      --body: #D6CCBB;
+      --secondary: #AFA492;
+      --muted: #8C8272;
+      --rule: #3A3329;
+      --rule-soft: #2F2921;
+      --accent: #E37A67;
+      --map: #8AA3D6;
+      --online: #5FB5C4;
+      --hold: #D3AC5D;
+      --drop: #DE8B7C;
+      --gold: #E0AE5C;
+      --shadow: 0 4px 16px rgba(0, 0, 0, .34);
+      --shadow-lift: 0 10px 30px rgba(0, 0, 0, .42);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #1B1815;
+    --panel: #242019;
+    --panel-soft: #2A251E;
+    --ink: #F1E9DA;
+    --body: #D6CCBB;
+    --secondary: #AFA492;
+    --muted: #8C8272;
+    --rule: #3A3329;
+    --rule-soft: #2F2921;
+    --accent: #E37A67;
+    --map: #8AA3D6;
+    --online: #5FB5C4;
+    --hold: #D3AC5D;
+    --drop: #DE8B7C;
+    --gold: #E0AE5C;
+    --shadow: 0 4px 16px rgba(0, 0, 0, .34);
+    --shadow-lift: 0 10px 30px rgba(0, 0, 0, .42);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--body);
+    font-family: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 56px 24px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 52px;
+  }
+
+  /* ---- masthead ---- */
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: "";
+    height: 1.5px;
+    width: 20px;
+    background: var(--accent);
+    opacity: .55;
+  }
+  .eyebrow::after { flex: 1; max-width: 60px; }
+
+  .masthead { display: flex; flex-direction: column; gap: 18px; }
+  h1 {
+    font-family: Newsreader, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(34px, 5vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -.01em;
+    color: var(--ink);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .standfirst {
+    max-width: 62ch;
+    font-size: 17px;
+    line-height: 1.7;
+    color: var(--body);
+    margin: 0;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+  .meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    font-size: 12.5px;
+    color: var(--muted);
+    border-top: 1px solid var(--rule);
+    margin-top: 4px;
+    padding-top: 14px;
+  }
+  .meta-line span { white-space: nowrap; }
+
+  /* ---- tally ---- */
+  .tally {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+    gap: 14px;
+  }
+  .tally-card {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-top: 3px solid var(--tone, var(--rule));
+  }
+  .tally-card .n {
+    font-family: Newsreader, Georgia, serif;
+    font-size: 40px;
+    line-height: 1;
+    font-weight: 400;
+    color: var(--tone, var(--ink));
+    font-variant-numeric: tabular-nums;
+  }
+  .tally-card .lbl {
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--ink);
+    margin-top: 8px;
+  }
+  .tally-card .sub { font-size: 13px; color: var(--secondary); line-height: 1.45; }
+
+  /* ---- sections ---- */
+  section { display: flex; flex-direction: column; gap: 18px; }
+  .sec-head { display: flex; flex-direction: column; gap: 8px; }
+  .sec-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--tone, var(--accent));
+  }
+  .sec-tag::before {
+    content: "";
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--tone, var(--accent));
+  }
+  h2 {
+    font-family: Newsreader, Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(25px, 3.2vw, 31px);
+    line-height: 1.2;
+    color: var(--ink);
+    margin: 0;
+    text-wrap: balance;
+  }
+  .sec-note { max-width: 68ch; margin: 0; font-size: 15.5px; color: var(--body); }
+  .sec-note + .sec-note { margin-top: -6px; }
+  .sec-note code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .88em;
+    background: var(--panel-soft);
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 1px 5px;
+  }
+
+  h3 {
+    font-family: "Hanken Grotesk", sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    margin: 14px 0 0;
+  }
+
+  /* ---- tables ---- */
+  .table-scroll {
+    overflow-x: auto;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    min-width: 620px;
+  }
+  thead th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+    background: var(--panel-soft);
+  }
+  tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    color: var(--body);
+    line-height: 1.55;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--panel-soft); }
+  td.name { color: var(--ink); font-weight: 600; }
+  .who { display: block; font-weight: 400; font-size: 13px; color: var(--secondary); margin-top: 2px; }
+  td.addr, td.tel { font-variant-numeric: tabular-nums; }
+  td.addr { color: var(--ink); }
+  td.note { color: var(--secondary); font-size: 13.5px; }
+  .idx {
+    font-family: Newsreader, Georgia, serif;
+    font-size: 17px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    width: 1%;
+    padding-right: 0;
+  }
+  .city {
+    font-weight: 700;
+    color: var(--drop);
+  }
+  .flag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    color: var(--hold);
+    margin-left: 6px;
+    vertical-align: 1px;
+  }
+  .icon-badge { color: var(--online); }
+
+  /* ---- callout ---- */
+  .callout {
+    background: var(--panel-soft);
+    border: 1px solid var(--rule);
+    border-left: 3px solid var(--tone, var(--accent));
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 15px;
+    color: var(--body);
+    max-width: 74ch;
+  }
+  .callout strong { color: var(--ink); }
+
+  /* ---- method list ---- */
+  .method {
+    display: grid;
+    gap: 0;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .method-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 18px;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--rule-soft);
+    align-items: baseline;
+  }
+  .method-row:last-child { border-bottom: none; }
+  .method-row dt {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--tone, var(--ink));
+  }
+  .method-row dd { margin: 0; font-size: 14.5px; color: var(--body); }
+
+  /* ---- next steps ---- */
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+  .steps li {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    font-size: 15.5px;
+    color: var(--body);
+  }
+  .steps li::before {
+    content: counter(step);
+    counter-increment: step;
+    font-family: Newsreader, Georgia, serif;
+    font-size: 15px;
+    color: var(--accent);
+    border: 1px solid var(--rule);
+    border-radius: 50%;
+    width: 26px; height: 26px;
+    display: grid;
+    place-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+  .steps { counter-reset: step; }
+
+  footer {
+    border-top: 1px solid var(--rule);
+    padding-top: 22px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 40px 16px 72px; gap: 42px; }
+    .method-row { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">Irving Catholic &middot; Directory intake</p>
+    <h1>Sorting the ICON list into the directory</h1>
+    <p class="standfirst">
+      Eighty rows from the ICON member recommendation sheet, checked one at a time against the City of
+      Irving city limits and against the 27 listings already on irving-catholic.net.
+      <strong>None of them are on the site yet</strong> &mdash; every business below is new, and the
+      no-storefront section is still holding its three <code>EXAMPLE ONLINE LISTING</code> placeholders.
+    </p>
+    <p class="meta-line">
+      <span>80 rows &rarr; 74 distinct businesses</span>
+      <span>Second pass, with your decisions applied</span>
+      <span>Source: ICON.csv</span>
+    </p>
+  </header>
+
+  <div class="tally">
+    <div class="tally-card" style="--tone: var(--map)">
+      <span class="n">10</span>
+      <span class="lbl">Brick &amp; mortar</span>
+      <span class="sub">Visitable Irving address. These get map pins.</span>
+    </div>
+    <div class="tally-card" style="--tone: var(--online)">
+      <span class="n">21</span>
+      <span class="lbl">Named businesses</span>
+      <span class="sub">No storefront, trading under a business name. The working set.</span>
+    </div>
+    <div class="tally-card" style="--tone: var(--hold)">
+      <span class="n">24</span>
+      <span class="lbl">Individuals</span>
+      <span class="sub">Trading under their own name. Parked for now.</span>
+    </div>
+    <div class="tally-card" style="--tone: var(--drop)">
+      <span class="n">14</span>
+      <span class="lbl">Discarded</span>
+      <span class="sub">Confirmed outside Irving city limits.</span>
+    </div>
+    <div class="tally-card" style="--tone: var(--hold)">
+      <span class="n">5</span>
+      <span class="lbl">Removed</span>
+      <span class="sub">One closed business, plus the four held names you cleared.</span>
+    </div>
+  </div>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag">This revision</span>
+      <h2>What changed on the second pass</h2>
+    </div>
+    <dl class="method">
+      <div class="method-row" style="--tone: var(--map)">
+        <dt>Category</dt>
+        <dd>All ten map listings are <code>owned</code> (Catholic Owned) rather than <code>business</code> &mdash; none of them sell a Catholic product.</dd>
+      </div>
+      <div class="method-row" style="--tone: var(--online)">
+        <dt>Addresses withheld</dt>
+        <dd><strong>VDP Partners</strong> and <strong>Sullivan Chimney Sweep</strong> moved to the no-storefront list with no address published.</dd>
+      </div>
+      <div class="method-row" style="--tone: var(--map)">
+        <dt>Addresses added</dt>
+        <dd><strong>Baker Tree Service</strong> and <strong>EFI Irrigation</strong> publish their addresses on their own websites &mdash; confirmed, and both are now mapped.</dd>
+      </div>
+      <div class="method-row" style="--tone: var(--online)">
+        <dt>Split in two</dt>
+        <dd>The no-storefront list is now 21 businesses trading under a name &mdash; the working set &mdash; and 24 individuals trading under their own name, held rather than dropped.</dd>
+      </div>
+      <div class="method-row" style="--tone: var(--hold)">
+        <dt>Removed</dt>
+        <dd><strong>A Guaranteed Home Appliance</strong> (Google lists it permanently closed), plus the four held names: Lorraine Marie Photography, Hope Sipe Photography, Mount Carmel Cleaners, and Tiny Saints.</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--map)">List 1 &middot; 10 businesses</span>
+      <h2>Brick &amp; mortar inside Irving city limits</h2>
+      <p class="sec-note">All ten go in the main map area with category <code>owned</code>.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th></th><th>Business</th><th>Address</th><th>Phone</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="idx">1</td>
+            <td class="name">Texas Mercy Clinic<span class="who">Dr. Lance Hoover, MD &mdash; pain &amp; headache, primary care, urgent care</span></td>
+            <td class="addr">4950 N O'Connor Rd, Ste 203<br>Irving, TX 75062</td>
+            <td class="tel">(469) 984-0311</td>
+            <td class="note">Appears three times on the sheet (Catholic Doctor, Doctor, Urgent Care) &mdash; one listing. Recommended by Dunikoski, Omvig, Rohter, Herrera, Dougherty.</td>
+          </tr>
+          <tr>
+            <td class="idx">2</td>
+            <td class="name">Dr. Neville Fernandes, MD<span class="who">Gastroenterology &mdash; Texas Digestive Disease Consultants</span></td>
+            <td class="addr">6750 N MacArthur Blvd, Ste 207<br>Irving, TX 75039</td>
+            <td class="tel">(972) 637-8480</td>
+            <td class="note">Faithful Catholic, attends St. Ann, per Laura Omvig.</td>
+          </tr>
+          <tr>
+            <td class="idx">3</td>
+            <td class="name">Ohlenforst &amp; Ward Orthodontics<span class="who">Dr. Patrick M. Ohlenforst</span></td>
+            <td class="addr">3200 N O'Connor Rd<br>Irving, TX 75062</td>
+            <td class="tel">(972) 257-3200</td>
+            <td class="note">Irving Chamber member; office confirmed active in 2026. The sheet listed no contact details at all.</td>
+          </tr>
+          <tr>
+            <td class="idx">4</td>
+            <td class="name">Dallas Pelvic Health<span class="who">Dr. Chelsea Harkins, PT, DPT</span></td>
+            <td class="addr">114 E John Carpenter Fwy, Ste 130<br>Irving, TX 75062</td>
+            <td class="tel">(469) 476-0915<span class="who">sheet lists 832-964-4738</span></td>
+            <td class="note">Owner-operated pelvic floor PT clinic; preconception, prenatal, and postpartum focus.</td>
+          </tr>
+          <tr>
+            <td class="idx">5</td>
+            <td class="name">Neuro Integration Services<span class="who">Eileen Kainer &mdash; NIS therapy</span></td>
+            <td class="addr">511 E John W Carpenter Fwy, Ste 500<br>Irving, TX 75062</td>
+            <td class="tel">(361) 648-7767</td>
+            <td class="note">Irving Chamber member. Same building as Beatitudes and the SVdP office already on the site &mdash; reuse 32.884692, -96.949608.</td>
+          </tr>
+          <tr>
+            <td class="idx">6</td>
+            <td class="name">James Sears Massage<span class="who">Licensed massage therapy, by appointment</span></td>
+            <td class="addr">105 W 2nd St<br>Irving, TX 75060</td>
+            <td class="tel">(214) 907-5009</td>
+            <td class="note">Downtown Irving studio, 17+ years licensed. One of the most-recommended names on the sheet.</td>
+          </tr>
+          <tr>
+            <td class="idx">7</td>
+            <td class="name">John Klassen Co.<span class="who">Klassen Plumbing</span></td>
+            <td class="addr">118 S Main St<br>Irving, TX 75060</td>
+            <td class="tel">(972) 259-9600</td>
+            <td class="note">Longstanding downtown Irving plumbing shop.</td>
+          </tr>
+          <tr>
+            <td class="idx">8</td>
+            <td class="name">Rohter &amp; Company<span class="who">Real estate brokerage &mdash; ICON contact Inez Hannegan</span></td>
+            <td class="addr">511 E John Carpenter Fwy, Ste 500<br>Irving, TX 75062</td>
+            <td class="tel">(972) 214-8756</td>
+            <td class="note">List the brokerage as the pin, with Inez as the contact. Same coordinate as row 5.</td>
+          </tr>
+          <tr>
+            <td class="idx">9</td>
+            <td class="name">Baker Tree Service<span class="who">James Baker</span></td>
+            <td class="addr">526 Campana Ct<br>Irving, TX 75061</td>
+            <td class="tel">(972) 986-7791</td>
+            <td class="note">Address published on the company's own site &mdash; confirmed. Est. 1970, Irving Chamber member. bts2005@verizon.net</td>
+          </tr>
+          <tr>
+            <td class="idx">10</td>
+            <td class="name">EFI &mdash; Environmentally Focused Irrigation<span class="who">Eddie Herrera</span></td>
+            <td class="addr">1605 W Seventh St<br>Irving, TX 75060</td>
+            <td class="tel">(918) 517-5028<span class="who">sheet lists 972-215-7644</span></td>
+            <td class="note">Address published on the company's own site &mdash; confirmed.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--hold)">Geocoding</span>
+      <h2>The coordinates come from a workflow, not from me</h2>
+      <p class="sec-note">
+        I could not geocode from this session. The egress policy blocks every geocoding host &mdash; the
+        US Census geocoder, Nominatim, Photon, Geoapify, ArcGIS, the City of Irving's own GIS server,
+        and OpenStreetMap itself all return 403 at the proxy. Google's API host is reachable but rejects
+        keyless requests.
+      </p>
+      <p class="sec-note">
+        Web search is not a substitute. It returned nothing for six of the nine addresses and
+        unverifiable numbers for the rest &mdash; and a wrong pin on a live map is worse than a missing
+        one. So it runs on GitHub Actions instead: no local machine, no terminal, all browser.
+      </p>
+    </div>
+    <ol class="steps">
+      <li>Open the repo on github.com and click the <strong>Actions</strong> tab.</li>
+      <li>Pick <strong>Geocode List 1 addresses</strong> in the left sidebar.</li>
+      <li>Click <strong>Run workflow</strong>, leave the branch on <code>main</code>, and press the green button.</li>
+      <li>When it finishes, open the run and click <strong>Open the pull request</strong> in the run summary. Let the checks go green, then merge.</li>
+    </ol>
+    <p class="sec-note">
+      The runner geocodes all ten addresses &mdash; US Census geocoder first, Nominatim as fallback,
+      neither needs an API key &mdash; and puts two files on a branch of its own:
+      <code>review/list-1-physical-irving.csv</code> with the coordinates, which geocoder answered, and
+      an <code>In Irving</code> column; and <code>review/list-1-geocoded.js</code> with listing objects
+      ready to paste into <code>resources</code>.
+    </p>
+    <div class="callout" style="--tone: var(--hold)">
+      <strong>Why there is a pull request step.</strong> The repository rules require every change to
+      <code>main</code> to arrive through a pull request with its checks green, so the job cannot push
+      its own results &mdash; the first run was rejected with <em>"Changes must be made through a pull
+      request."</em> The results go to their own branch instead, and the run summary links straight to
+      the pull request form. The link is deliberate rather than the job opening the pull request
+      itself: a pull request created with the workflow's own token does not start CI, so its two
+      required checks would sit unstarted and it could never be merged.
+    </div>
+    <p class="sec-note">
+      Every result is checked against the 201-point municipal boundary already in
+      <code>directory-data.js</code> and flagged <code>NO - CHECK</code> if it lands outside. That check
+      is tested and working: all 24 existing Irving listings pass it, and Coppell, Dallas, Fort Worth,
+      Flower Mound, and the DFW Airport centroid are all correctly rejected. Anything that misses is
+      named in the run summary, and the results are attached to the run as an artifact too, so a
+      rejected push can never lose them again.
+    </p>
+    <p class="sec-note">
+      Address-level sanity in the meantime: all ten sit in core Irving ZIPs &mdash; 75039, 75060, 75061,
+      75062 &mdash; none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
+    </p>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--online)">List 2A &middot; 21 businesses</span>
+      <h2>Named businesses, no storefront</h2>
+      <p class="sec-note">
+        Home-based, mobile, or online only, and trading under a business name. This is the working set.
+        Entries tagged <span class="flag">held</span> had no verifiable location at all.
+      </p>
+    </div>
+
+    <h3>Food</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Saint Honor&eacute; Bread Company</td><td class="">Sourdough bakery</td><td class="tel">(202) 262-7433 &middot; @sainthonoreirving</td><td class="note">Cottage bakery in the Nichols Park neighborhood &mdash; verified Irving. Christian Lenczowski.</td></tr>
+          <tr><td class="name">Bascom Bread Co.<span class="who">Margaret Smillie</span></td><td class="">Bakery</td><td class="tel">406-438-5973 &middot; margesmillie17@gmail.com</td><td class="note">Fresh-milled flour, sourdough, sweets. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Zita's TX Bakeshop<span class="who">Janes Petres</span></td><td class="">Italian cookies, pastries, cakes</td><td class="tel">410-271-3960 &middot; bakesy.shop/b/zitas-tx-bakeshop</td><td class="note">Pickup in Irving. <span class="flag icon-badge">ICON</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Home &amp; trades</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">ProJoe Construction<span class="who">Joseph Klassen</span></td><td class="">Handyman</td><td class="tel">913-749-6821</td><td class="note">Carpentry, fencing, painting, drywall, electrical.</td></tr>
+          <tr><td class="name">Sullivan Chimney Sweep<span class="who">Luke Sullivan</span></td><td class="">Chimney sweep, fireplace, dryer vents</td><td class="tel">817-914-4898 &middot; sullivanchimneysweep.com</td><td class="note">Address withheld &mdash; runs out of a residence.</td></tr>
+          <tr><td class="name">PB Landscaping, LLC<span class="who">Peter Butler</span></td><td class="">Landscaping, tree, lawn, irrigation</td><td class="tel">214-502-7837 &middot; pb-landscaping.com</td><td class="note">Verified Irving-based. Family business funding college for the Butler brothers.</td></tr>
+          <tr><td class="name">Mid-Cities Shed Company<span class="who">Aaron Alonso</span></td><td class="">Sheds</td><td class="tel">(817) 612-6134 &middot; mcshedco.com</td><td class="note">No location found in any public record. <span class="flag">held</span></td></tr>
+          <tr><td class="name">GF Ranch and Repair<span class="who">Erik Maki</span></td><td class="">Small engine repair</td><td class="tel">321-234-2293</td><td class="note">No location found in any public record. <span class="flag">held</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Auto</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">EMP Auto<span class="who">Eric Palmer</span></td><td class="">Car mechanic</td><td class="tel">817-705-8112 &middot; eric.empauto@gmail.com</td><td class="note">No shop address found anywhere. Text for fastest response.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Catholic goods &amp; gifts</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Angelico Design Co.<span class="who">Avory Hissock</span></td><td class="">Baby &amp; sacrament gifts, printables</td><td class="tel">&mdash;</td><td class="note">Home goods and feast-day activities too. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Beauty of Truth Designs<span class="who">Lindsay Brennan</span></td><td class="">Catholic gifts, custom artwork</td><td class="tel">beautyoftruthdesigns.com</td><td class="note"><span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Catholic by Design<span class="who">Anne Palmer</span></td><td class="">Catholic gifts</td><td class="tel">catholicbydesign.etsy.com</td><td class="note"><span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Conversion Starters</td><td class="">Evangelization apparel</td><td class="tel">conversionstarters.com</td><td class="note">Shirts, hoodies, totes and mugs that pose a question and point to the answer. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">St. Lawrence Grill Works<span class="who">Dorianne &amp; Matt Hull</span></td><td class="">Hand-forged grill tools</td><td class="tel">stlawrencegrillworks.com &middot; doriannehull@gmail.com</td><td class="note">Stainless, hand forged in the USA, lifetime warranty. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Matris Apothecary<span class="who">Brianna Harrison</span></td><td class="">Soaps, creams, salves</td><td class="tel">brianna.bell@wyomingcatholic.edu</td><td class="note">Grass-fed beef tallow; no website, email for the product list. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Mary Malone Ware</td><td class="">Pottery</td><td class="tel">marymaloneware.etsy.com</td><td class="note">Mugs, kitchenware, kids' pieces, ornaments. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Purple Lamb Fiber Arts<span class="who">Carla Hanson</span></td><td class="">Hand-dyed yarn and fiber</td><td class="tel">purplelambfiberarts.com</td><td class="note">Public profile says only "North Texas". <span class="flag">held</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Lessons</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Studio Ars Angeli<span class="who">Anna Dougherty</span></td><td class="">Violin lessons</td><td class="tel">see sheet for site link</td><td class="note">Sheet notes availability only until late July &mdash; worth re-confirming.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Professional &amp; other</h3>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">VDP Partners LLC<span class="who">Damien Van der Putten, PA</span></td><td class="">Insurance / public adjuster</td><td class="tel">817-501-8780 &middot; vdppartners.com</td><td class="note">Helps with claims the insurer underpays. Address withheld &mdash; runs out of a residence. <span class="flag icon-badge">ICON</span></td></tr>
+          <tr><td class="name">Love For Sunday Floral Co.</td><td class="">Silk wedding flowers</td><td class="tel">loveforsundayco.com</td><td class="note">Made to order and shipped; no location published. <span class="flag">held</span></td></tr>
+          <tr><td class="name">Bin There Dump That<span class="who">Sylvia &amp; Valentas Zhukas</span></td><td class="">Dumpster rental</td><td class="tel">szhukas5@gmail.com</td><td class="note">Dallas-metro franchise whose service area covers Irving. <span class="flag">held</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--hold)">List 2B &middot; 24 people</span>
+      <h2>Individuals, held</h2>
+      <p class="sec-note">
+        People offering a service under their own name, with no business name to list. On hold and not
+        being worked for now &mdash; nothing is wrong with any of them, they are parked rather than
+        dropped.
+      </p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Person</th><th>Service</th><th>Contact</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Joe Morris</td><td class="">Carpenter &amp; handyman</td><td class="tel">469-880-5980 &middot; 817-673-2163</td><td class="note">Two rows on the sheet, one person.</td></tr>
+          <tr><td class="name">Enrique Man</td><td class="">Handyman &amp; HVAC</td><td class="tel">469-834-6383</td><td class="note">Two rows on the sheet, one person.</td></tr>
+          <tr><td class="name">Bob Ottaviano</td><td class="">Handyman</td><td class="tel">214-766-7973</td><td class="note">Big and small jobs, affordable.</td></tr>
+          <tr><td class="name">Joe Figenshue</td><td class="">Handyman</td><td class="tel">(214) 458-3224</td><td class="note"></td></tr>
+          <tr><td class="name">Cristian Kercher</td><td class="">HVAC</td><td class="tel">682-384-2350</td><td class="note"></td></tr>
+          <tr><td class="name">Hank Tritchka</td><td class="">Gutters</td><td class="tel">469-449-4997</td><td class="note"></td></tr>
+          <tr><td class="name">Matt Pierce</td><td class="">Painter</td><td class="tel">602-768-0920</td><td class="note"></td></tr>
+          <tr><td class="name">Sebastian Kercher</td><td class="">Power washing</td><td class="tel">817-357-7508</td><td class="note"></td></tr>
+          <tr><td class="name">Rafe Butler</td><td class="">Power &amp; soft washing</td><td class="tel">817-932-5432 &middot; rbutlerwashing@gmail.com</td><td class="note">Young entrepreneur funding flight training.</td></tr>
+          <tr><td class="name">Moris Neri</td><td class="">Yardwork, hauling, cleanouts</td><td class="tel">945-247-9534 &middot; realrugby@proton.me</td><td class="note">Homeschooled, flexible schedule.</td></tr>
+          <tr><td class="name">Martha Villafuerte</td><td class="">Cleaning</td><td class="tel">682-465-5674</td><td class="note">Many recommendations.</td></tr>
+          <tr><td class="name">Vinny di Lucca</td><td class="">Car detailing</td><td class="tel">(208) 316-8219</td><td class="note">UD student running his own business.</td></tr>
+          <tr><td class="name">Mulvaney Boys</td><td class="">Car detailing</td><td class="tel">mulvaney1999@protonmail.com</td><td class="note">Mobile &mdash; they come to your house.</td></tr>
+          <tr><td class="name">Laurie DePauw</td><td class="">Piano &amp; voice; Spelling to Communicate</td><td class="tel">314-913-4672 &middot; lauriesings1@yahoo.com</td><td class="note">Two rows on the sheet, one person. 25+ years teaching. S2C-certified.</td></tr>
+          <tr><td class="name">Bebe Bloch (Carlson)</td><td class="">Vocalist &amp; pianist; teacher</td><td class="tel">703-244-1192 &middot; bebeblochmusic.com</td><td class="note">Two rows on the sheet, one person. Limited teaching availability.</td></tr>
+          <tr><td class="name">Matthew Denny</td><td class="">Piano teacher</td><td class="tel">818-862-0622 &middot; mdenny@udallas.edu</td><td class="note">First half lesson free, from $40/hr, can travel.</td></tr>
+          <tr><td class="name">Max Wilson</td><td class="">Piano teacher</td><td class="tel">(972) 626-4059</td><td class="note">In-home lessons in and around Irving.</td></tr>
+          <tr><td class="name">Grace Denny</td><td class="">Violin lessons</td><td class="tel">972-655-6706</td><td class="note">First lesson free; also piano, guitar, theory. Lifeguards for the City of Irving.</td></tr>
+          <tr><td class="name">Gaby Peters</td><td class="">Swim lessons</td><td class="tel">countryrose04@gmail.com</td><td class="note">Recommended by Lisa Irbeck.</td></tr>
+          <tr><td class="name">Adrian Montes</td><td class="">Tennis lessons</td><td class="tel">361-933-6520</td><td class="note"></td></tr>
+          <tr><td class="name">Adrienne Wright</td><td class="">Wedding planner</td><td class="tel">214-284-5475</td><td class="note">Recommended by Powers, Sheila, Meier, Krieg.</td></tr>
+          <tr><td class="name">Laura Sercer</td><td class="">Florist</td><td class="tel">(404) 538-1097</td><td class="note"></td></tr>
+          <tr><td class="name">Marianna Muller</td><td class="">Licensed travel agent</td><td class="tel">marianna@delladventures.com</td><td class="note">Works under the Dell Adventures agency.</td></tr>
+          <tr><td class="name">Dominic Dougherty</td><td class="">Financial advisor</td><td class="tel">214-790-2878</td><td class="note">Cell only; no office on record.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>The judgment calls</h3>
+    <p class="sec-note">Six entries could have gone either way. Flagging them so you can flip any of them.</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Entry</th><th>Called it</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td class="name">Sullivan Chimney Sweep</td><td class=""><strong>Named</strong></td><td class="note">Surname-based, but a registered business with its own website and 158 Yelp reviews.</td></tr>
+          <tr><td class="name">Mary Malone Ware</td><td class=""><strong>Named</strong></td><td class="note">A shop brand built on her name, trading on Etsy under that name.</td></tr>
+          <tr><td class="name">EMP Auto</td><td class=""><strong>Named</strong></td><td class="note">A real trading name, even though the business has no web presence at all.</td></tr>
+          <tr><td class="name">Mulvaney Boys</td><td class=""><strong>Individual</strong></td><td class="note">A family nickname on the sheet, not a registered business name.</td></tr>
+          <tr><td class="name">Marianna Muller</td><td class=""><strong>Individual</strong></td><td class="note">The brand is Dell Adventures, a host agency; she is an agent under it, and she is the ICON member.</td></tr>
+          <tr><td class="name">Bebe Bloch (Carlson)</td><td class=""><strong>Individual</strong></td><td class="note">Has a website, but it is a personal performer and teacher page, not a business identity.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--hold)">Removed &middot; 5 businesses</span>
+      <h2>Off the list</h2>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Reason</th></tr></thead>
+        <tbody>
+          <tr><td class="name">A Guaranteed Home Appliance<span class="who">Bill Kurtz</span></td><td class="note">Google lists the business as permanently closed.</td></tr>
+          <tr><td class="name">Lorraine Marie Photography</td><td class="note">Held bucket cleared.</td></tr>
+          <tr><td class="name">Hope Sipe Photography</td><td class="note">Held bucket cleared.</td></tr>
+          <tr><td class="name">Mount Carmel Cleaners<span class="who">Yassi &amp; Michael Longoria</span></td><td class="note">Held bucket cleared.</td></tr>
+          <tr><td class="name">Tiny Saints / catholic.store<span class="who">Jessica Thornton</span></td><td class="note">Held bucket cleared.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag" style="--tone: var(--drop)">Discarded &middot; 14 businesses</span>
+      <h2>Outside Irving city limits</h2>
+      <p class="sec-note">Each of these has a confirmed physical location somewhere other than Irving.</p>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Business</th><th>Trade</th><th>Confirmed location</th></tr></thead>
+        <tbody>
+          <tr><td class="name">WholeLife Authentic Care<span class="who">Dr. Alison Collins</span></td><td>Family medicine</td><td class="addr">1000 Bonnie Brae Ave, <span class="city">Fort Worth</span> 76111</td></tr>
+          <tr><td class="name">Dr. Cole Kricken, DC</td><td>Chiropractor</td><td class="addr">4001 McEwen Rd, Ste 100, <span class="city">Dallas</span> 75244</td></tr>
+          <tr><td class="name">A Good Path Christian Counseling<span class="who">Josh Cordonnier</span></td><td>Counseling</td><td class="addr">600 Denton Tap Rd, Ste 100, <span class="city">Coppell</span> 75019 &mdash; the sheet itself gives this address</td></tr>
+          <tr><td class="name">Siena Counseling<span class="who">Jennifer Bishop Milano</span></td><td>Counseling</td><td class="addr">Based in <span class="city">Connecticut</span>; Texas is telehealth-only coverage</td></tr>
+          <tr><td class="name">Calvin's Climate</td><td>HVAC</td><td class="addr">2811 Justin Rd, <span class="city">Flower Mound</span> 75028</td></tr>
+          <tr><td class="name">Absolute Painting, Inc.<span class="who">Wes Stafish</span></td><td>Painter</td><td class="addr">7210 Virginia Pkwy, <span class="city">McKinney</span> 75071</td></tr>
+          <tr><td class="name">Providence Roofing &amp; Restoration</td><td>Roofing</td><td class="addr">DFW contractor; chamber and BBB records in <span class="city">Denton</span> and <span class="city">DeSoto</span>, none in Irving</td></tr>
+          <tr><td class="name">Texas Pecan Company</td><td>Candy &amp; pecans</td><td class="addr">2850 Satsuma Dr, <span class="city">Dallas</span> 75229</td></tr>
+          <tr><td class="name">The Blonde Bakeshop<span class="who">Betsy de los Santos</span></td><td>Wedding cakes</td><td class="addr"><span class="city">Keller</span>, TX</td></tr>
+          <tr><td class="name">Mother &amp; Unborn Baby Care</td><td>Pregnancy assistance</td><td class="addr">3264 Lackland Rd, <span class="city">Fort Worth</span> 76116</td></tr>
+          <tr><td class="name">White Rose Women's Center</td><td>Pregnancy assistance</td><td class="addr">4313 N Central Expy, <span class="city">Dallas</span> 75205 (plus 8499 Greenville Ave)</td></tr>
+          <tr><td class="name">360 Integrated Financial<span class="who">Daniel Hamlet</span></td><td>Financial advisor</td><td class="addr">Business presence in <span class="city">Fairmont, Minnesota</span>; UD alum advising remotely</td></tr>
+          <tr><td class="name">David Ross, Broker-Realtor</td><td>Realtor</td><td class="addr">Dallas-area broker; brokerage record in <span class="city">Allen</span>, TX &mdash; no Irving office</td></tr>
+          <tr><td class="name">My Catholic Doctor</td><td>Virtual primary &amp; specialty care</td><td class="addr">National telehealth practice, no Irving location; the ICON contact is an employee, not an owner</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-head">
+      <span class="sec-tag">Before List 1 goes live</span>
+      <h2>What's left to do</h2>
+    </div>
+    <ol class="steps">
+      <li>Run the <strong>Geocode List 1 addresses</strong> workflow from the Actions tab, then paste <code>review/list-1-geocoded.js</code> into <code>resources</code> in <code>directory-data.js</code>. Rows 5 and 8 can reuse 32.884692, -96.949608 if you would rather not wait on the geocoder for those two.</li>
+      <li>Write a one-line <code>blurb</code> and a short <code>description</code> for each. The ICON comments are good raw material and several are directly quotable.</li>
+      <li>Confirm each business wants to be listed &mdash; especially the four medical practices, which did not submit themselves.</li>
+      <li>Replace the three <code>EXAMPLE ONLINE LISTING</code> placeholders as the first real no-storefront entries land.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Assessment of ICON.csv against directory-data.js &middot; irving-catholic.net &middot; August 2026</span>
+    <span>Machine-readable versions of each list live in <code>review/</code> on the assessment branch.</span>
+  </footer>
+
+</div>

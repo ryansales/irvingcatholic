@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Update your information — Irving Catholic</title>
+<meta name="description" content="Correct or update an existing listing in the Irving Catholic directory — hours, Mass times, contact details, photos.">
+<link rel="canonical" href="https://irving-catholic.net/update.html">
+<meta property="og:title" content="Update your information — Irving Catholic">
+<meta property="og:description" content="Correct or update an existing listing in the Irving Catholic directory — hours, Mass times, contact details, photos.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Irving Catholic">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://irving-catholic.net/update.html">
+<meta property="og:image" content="https://irving-catholic.net/images/blessed-virgin.jpg">
+<meta property="og:image:alt" content="Engraving of Saint Mary the Blessed Virgin">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Update your information — Irving Catholic">
+<meta name="twitter:description" content="Correct or update an existing listing in the Irving Catholic directory — hours, Mass times, contact details, photos.">
+<meta name="twitter:image" content="https://irving-catholic.net/images/blessed-virgin.jpg">
+<meta name="theme-color" content="#bf4a3c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="./forms.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./directory-data.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← Back to the map</a>
+  <a class="wordmark" href="index.html">
+    <span class="mark">✦</span>
+    <span class="name">Irving Catholic</span>
+  </a>
+</div>
+
+<div class="wrap wrap-wide">
+
+  <div class="pagehead">
+    <div class="eyebrow">Update your information</div>
+    <h1 class="display">Something here<br>out of date?</h1>
+    <p class="lede">Mass times shift, offices move, phone numbers change, and a directory maintained by one person drifts. Pick your listing below and edit what's wrong — the current details load in ready to change, so you only touch the bits that need it.</p>
+    <p class="lede">Updates are reviewed by a person before they go live. Corrections from the parish, school, or business itself are trusted and applied quickly.</p>
+  </div>
+
+  <div class="aside">
+    <p><strong>Not listed at all yet?</strong> That's the other form — <a href="suggest.html">suggest a listing →</a></p>
+    <p><strong>Rather email?</strong> Send what's changed to <a href="mailto:ryan@salesfamily.net">ryan@salesfamily.net</a>, photos attached. Just say which listing you mean.</p>
+  </div>
+
+  <div id="errors" class="errors" role="alert" aria-live="assertive"></div>
+
+  <form id="updateForm"
+        name="update-a-listing"
+        method="POST"
+        action="/thanks.html?sent=update"
+        data-netlify="true"
+        data-netlify-honeypot="bot-field"
+        enctype="multipart/form-data"
+        novalidate>
+
+    <input type="hidden" name="form-name" value="update-a-listing">
+    <p class="hidden"><label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+
+    <input type="hidden" name="Listing" id="gen-listing" value="">
+    <input type="hidden" name="Listing id" id="gen-id" value="">
+    <input type="hidden" name="What changed" id="gen-changes" value="">
+    <input type="hidden" name="Photos attached" id="gen-photos" value="">
+    <input type="hidden" name="Paste-ready JSON" id="gen-json" value="">
+
+    <!-- ============================================================ 1 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">1</span><h2 class="section">Which listing?</h2></div>
+      <p class="section-note">Start typing to jump down the list.</p>
+
+      <div class="field">
+        <label for="u-pick">Listing<span class="req">*</span></label>
+        <select id="u-pick" name="Listing picked">
+          <option value="">Loading the directory…</option>
+        </select>
+      </div>
+
+      <div id="currentCard" class="aside hidden" style="margin-bottom:0">
+        <p><strong id="curName"></strong> · <span id="curCat"></span></p>
+        <p id="curAddr" style="color:var(--muted)"></p>
+        <p><a id="curLink" target="_blank">View the live listing →</a></p>
+      </div>
+    </div>
+
+    <!-- ============================================================ 2 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">2</span><h2 class="section">What kind of update?</h2></div>
+
+      <div class="field">
+        <label class="choice" style="margin-bottom:12px">
+          <input type="radio" name="Update type" value="Correction or new details" checked>
+          <span class="dot"></span>
+          <span class="t">Correct or add details</span>
+          <span class="d">Hours, Mass times, phone, website, description, address — anything on the listing.</span>
+        </label>
+        <label class="choice" style="margin-bottom:12px">
+          <input type="radio" name="Update type" value="Photos only">
+          <span class="dot"></span>
+          <span class="t">Just sending photos</span>
+          <span class="d">The details are right; here are better pictures.</span>
+        </label>
+        <label class="choice" style="margin-bottom:12px">
+          <input type="radio" name="Update type" value="Permanently closed or moved away">
+          <span class="dot"></span>
+          <span class="t">It has closed, or moved out of Irving</span>
+          <span class="d">We'll verify and take it off the map.</span>
+        </label>
+        <label class="choice" style="margin-bottom:0">
+          <input type="radio" name="Update type" value="Please remove this listing">
+          <span class="dot"></span>
+          <span class="t">Please remove this listing</span>
+          <span class="d">If you represent it and would rather not be listed, just say so — we'll remove it, no questions.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ============================================================ 3 -->
+    <div class="card step" id="editBlock">
+      <div class="step-head"><span class="step-no">3</span><h2 class="section">The details</h2></div>
+      <p class="section-note">These are loaded with what the site says today. Change only what's wrong — everything you leave alone stays as it is.</p>
+
+      <div class="field">
+        <label for="u-name">Name</label>
+        <input type="text" id="u-name" name="Name">
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="u-category">Category</label>
+          <select id="u-category" name="Category">
+            <option value="church">Churches &amp; Parishes</option>
+            <option value="school">Schools &amp; Universities</option>
+            <option value="religious">Orders &amp; Seminaries</option>
+            <option value="ministry">Ministries &amp; Non-profits</option>
+            <option value="business">Catholic Businesses</option>
+            <option value="owned">Catholic Owned</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="u-phone">Phone</label>
+          <input type="tel" id="u-phone" name="Phone">
+        </div>
+      </div>
+
+      <div class="field" id="addressField">
+        <label for="u-address">Address</label>
+        <input type="text" id="u-address" name="Address">
+        <p class="hint">Change this and a map appears so you can move the pin to match.</p>
+      </div>
+
+      <div class="field hidden" id="pinField">
+        <span class="fieldset-label">Move the map pin</span>
+        <p class="hint above">The address changed, so the pin needs to move too. Use <strong>Find this address</strong>, or click the map.</p>
+        <div class="map-shell">
+          <div id="pinMap" style="height:280px"></div>
+          <div class="map-bar">
+            <button type="button" class="btn btn-ghost btn-sm" id="geocodeBtn">Find this address</button>
+            <span class="map-status idle" id="pinStatus">No pin placed yet</span>
+          </div>
+        </div>
+        <input type="hidden" name="Latitude" id="u-lat" value="">
+        <input type="hidden" name="Longitude" id="u-lng" value="">
+      </div>
+
+      <div class="field" id="hoursField">
+        <label for="u-hours">Hours</label>
+        <input type="text" id="u-hours" name="Hours">
+      </div>
+
+      <div class="field">
+        <label for="u-blurb">One-line summary</label>
+        <input type="text" id="u-blurb" name="Blurb" maxlength="140">
+        <div class="counter" id="blurbCount"></div>
+        <p class="hint">Shown on the map pin and the sidebar card.</p>
+      </div>
+
+      <div class="field">
+        <label for="u-description">Full description</label>
+        <textarea id="u-description" name="Description" rows="7" maxlength="900"></textarea>
+        <div class="counter" id="descCount"></div>
+      </div>
+
+      <div class="field" id="massField">
+        <label for="u-mass">Mass &amp; liturgy times</label>
+        <textarea id="u-mass" name="Mass times" rows="6"></textarea>
+        <p class="hint"><strong>One time per line.</strong> Include languages, confessions, and adoration.</p>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="u-website">Website</label>
+          <div class="prefix-input">
+            <span class="prefix">https://</span>
+            <input type="text" id="u-website" name="Website">
+          </div>
+        </div>
+        <div class="field">
+          <label for="u-email">Public email</label>
+          <input type="email" id="u-email" name="Public email">
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="field">
+          <label for="u-instagram">Instagram</label>
+          <div class="prefix-input at">
+            <span class="prefix">@</span>
+            <input type="text" id="u-instagram" name="Instagram">
+          </div>
+        </div>
+        <div class="field">
+          <label for="u-facebook">Facebook</label>
+          <input type="text" id="u-facebook" name="Facebook">
+        </div>
+        <div class="field">
+          <label for="u-etsy">Etsy or online shop</label>
+          <input type="text" id="u-etsy" name="Etsy or shop">
+        </div>
+      </div>
+
+      <div class="field hidden" id="ordersField">
+        <label for="u-orders">How do people order or book?</label>
+        <input type="text" id="u-orders" name="Orders note">
+      </div>
+    </div>
+
+    <!-- ====================================================== closure -->
+    <div class="card step hidden" id="closeBlock">
+      <div class="step-head"><span class="step-no">3</span><h2 class="section">What happened?</h2></div>
+      <div class="field">
+        <label for="u-closereason">Tell us a little<span class="req">*</span></label>
+        <textarea id="u-closereason" name="Closure or removal details" rows="5"
+                  placeholder="Closed in June, merged with another parish, moved to Coppell, would rather not be listed…"></textarea>
+        <p class="hint">A date or a link to an announcement helps us verify quickly.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ 4 -->
+    <div class="card step" id="photoBlock">
+      <div class="step-head"><span class="step-no">4</span><h2 class="section">Photos</h2></div>
+      <p class="section-note">Only if you have some. Anything you send replaces what's on the listing page now.</p>
+
+      <div class="aside">
+        <p>The <strong>banner</strong> runs across the top of the page — landscape works best. The <strong>three smaller photos</strong> sit in a row underneath. Under 5 MB each; anything larger can come by email.</p>
+      </div>
+
+      <div class="field">
+        <div class="photo-grid" style="grid-template-columns:1fr">
+          <div class="photo-slot hero">
+            <label class="photo-drop">
+              <input type="file" name="Banner photo" accept="image/*" data-slot="Banner">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span>
+              <span class="lbl">Banner photo — click or drop</span>
+              <span class="fname"></span>
+            </label>
+            <p class="slot-cap">Banner photo <span>— wide / landscape, roughly 1600 × 900</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="fieldset-label">Three smaller photos<span class="opt">optional</span></span>
+        <div class="photo-grid">
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 1" accept="image/*" data-slot="Photo 1">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span><span class="lbl">Photo 1</span><span class="fname"></span>
+            </label>
+          </div>
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 2" accept="image/*" data-slot="Photo 2">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span><span class="lbl">Photo 2</span><span class="fname"></span>
+            </label>
+          </div>
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 3" accept="image/*" data-slot="Photo 3">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span><span class="lbl">Photo 3</span><span class="fname"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="u-credit">Photo credit</label>
+          <input type="text" id="u-credit" name="Photo credit" placeholder="Photo: Jane Doe">
+        </div>
+        <div class="field">
+          <label for="u-photolink">Or link to photos</label>
+          <input type="text" id="u-photolink" name="Photo link" placeholder="Google Drive, Dropbox, or a page we can pull from">
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ 5 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">5</span><h2 class="section">About you</h2></div>
+      <p class="section-note">Never published — it just lets us come back with a question, and tells us how much weight the correction carries.</p>
+
+      <div class="row">
+        <div class="field">
+          <label for="u-yourname">Your name<span class="req">*</span></label>
+          <input type="text" id="u-yourname" name="Submitted by" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="u-youremail">Your email<span class="req">*</span></label>
+          <input type="email" id="u-youremail" name="Your email" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="u-yourphone">Your phone<span class="opt">optional</span></label>
+          <input type="tel" id="u-yourphone" name="Your phone" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label for="u-relationship">Your connection to it<span class="req">*</span></label>
+          <select id="u-relationship" name="Relationship">
+            <option value="">Choose one…</option>
+            <option>I work there or represent it officially</option>
+            <option>I'm the owner</option>
+            <option>I'm a parishioner, parent, or member</option>
+            <option>I'm a customer or regular visitor</option>
+            <option>No connection — I just noticed it was wrong</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="u-notes">Anything else?<span class="opt">optional</span></label>
+        <textarea id="u-notes" name="Notes" rows="4"
+                  placeholder="Context, a source we can check, a good time to call…"></textarea>
+      </div>
+    </div>
+
+    <!-- ======================================================= summary -->
+    <div class="card" id="summaryCard">
+      <h2 class="section">What you're changing</h2>
+      <p class="section-note">A last look before it goes.</p>
+      <div class="diff" id="diffOut"><div class="diff-empty">Nothing changed yet — edit a field above and it'll show up here.</div></div>
+    </div>
+
+    <div class="actions" style="margin-bottom:34px">
+      <button type="submit" class="btn btn-primary">Send this update</button>
+      <span class="note">Reviewed by a person before it goes live.</span>
+    </div>
+  </form>
+
+</div>
+
+<footer class="sitefooter">
+  <div class="inner">
+    <div>
+      <div class="name">Irving Catholic</div>
+      <p>A community-maintained directory of Catholic churches, schools, ministries, and businesses in the Irving area.</p>
+    </div>
+    <div>
+      <div class="h">Get involved</div>
+      <a class="l" href="suggest.html">Suggest a listing</a>
+      <a class="l" href="update.html">Update your information</a>
+      <a class="l" href="contact.html">Contact us</a>
+    </div>
+  </div>
+  <div class="base">
+    <span>© 2026 Ryan Sales</span>
+    <span>Made with care in Irving, Texas</span>
+  </div>
+</footer>
+
+<script src="./forms.js"></script>
+<script>
+(function () {
+  var IC = window.ICForms;
+  var form = document.getElementById('updateForm');
+  var box = document.getElementById('errors');
+
+  var pick = document.getElementById('u-pick');
+  var editBlock = document.getElementById('editBlock');
+  var closeBlock = document.getElementById('closeBlock');
+  var photoBlock = document.getElementById('photoBlock');
+  var summaryCard = document.getElementById('summaryCard');
+  var pinField = document.getElementById('pinField');
+  var massField = document.getElementById('massField');
+  var hoursField = document.getElementById('hoursField');
+  var addressField = document.getElementById('addressField');
+  var ordersField = document.getElementById('ordersField');
+  var diffOut = document.getElementById('diffOut');
+
+  var el = {
+    name: document.getElementById('u-name'),
+    category: document.getElementById('u-category'),
+    phone: document.getElementById('u-phone'),
+    address: document.getElementById('u-address'),
+    lat: document.getElementById('u-lat'),
+    lng: document.getElementById('u-lng'),
+    hours: document.getElementById('u-hours'),
+    blurb: document.getElementById('u-blurb'),
+    description: document.getElementById('u-description'),
+    mass: document.getElementById('u-mass'),
+    website: document.getElementById('u-website'),
+    email: document.getElementById('u-email'),
+    instagram: document.getElementById('u-instagram'),
+    facebook: document.getElementById('u-facebook'),
+    etsy: document.getElementById('u-etsy'),
+    orders: document.getElementById('u-orders'),
+    credit: document.getElementById('u-credit'),
+    closereason: document.getElementById('u-closereason'),
+    yourname: document.getElementById('u-yourname'),
+    youremail: document.getElementById('u-youremail'),
+    relationship: document.getElementById('u-relationship')
+  };
+
+  /* The editable fields, in the order they should appear in the change
+     summary, with the directory key each one maps to. */
+  var FIELDS = [
+    { el: el.name,        key: 'name',        label: 'Name' },
+    { el: el.category,    key: 'category',    label: 'Category', display: IC.categoryLabel },
+    { el: el.address,     key: 'address',     label: 'Address' },
+    { el: el.hours,       key: 'hours',       label: 'Hours' },
+    { el: el.blurb,       key: 'blurb',       label: 'Summary' },
+    { el: el.description, key: 'description', label: 'Description' },
+    { el: el.mass,        key: 'mass',        label: 'Mass times', multiline: true },
+    { el: el.phone,       key: 'phone',       label: 'Phone' },
+    { el: el.website,     key: 'website',     label: 'Website',   clean: IC.cleanWebsite },
+    { el: el.email,       key: 'email',       label: 'Email' },
+    { el: el.instagram,   key: 'instagram',   label: 'Instagram', clean: IC.cleanHandle },
+    { el: el.facebook,    key: 'facebook',    label: 'Facebook',  clean: IC.cleanFacebook },
+    { el: el.etsy,        key: 'etsy',        label: 'Etsy / shop', clean: IC.cleanWebsite },
+    { el: el.orders,      key: 'ordersNote',  label: 'Orders note' }
+  ];
+
+  var current = null;   // the resource object as it stands in directory-data.js
+  var picker = null;
+
+  function updateType() {
+    var r = form.querySelector('input[name="Update type"]:checked');
+    return r ? r.value : '';
+  }
+  function isClosureType() {
+    var t = updateType();
+    return t.indexOf('Permanently closed') === 0 || t.indexOf('Please remove') === 0;
+  }
+  function isPhotosOnly() { return updateType() === 'Photos only'; }
+
+  /* ------------------------------------------------------- populate list */
+
+  function fillPicker(data) {
+    var groups = {};
+    data.resources.forEach(function (r) {
+      (groups[r.category] = groups[r.category] || []).push(r);
+    });
+    pick.innerHTML = '<option value="">Choose a listing…</option>';
+    Object.keys(data.categories).forEach(function (key) {
+      var rs = groups[key];
+      if (!rs || !rs.length) return;
+      var og = document.createElement('optgroup');
+      og.label = data.categories[key].label;
+      rs.sort(function (a, b) { return a.name.localeCompare(b.name); }).forEach(function (r) {
+        var o = document.createElement('option');
+        o.value = r.id;
+        o.textContent = r.name;
+        og.appendChild(o);
+      });
+      pick.appendChild(og);
+    });
+  }
+
+  /* ----------------------------------------------------------- prefill */
+
+  function originalValue(f) {
+    if (!current) return '';
+    if (f.key === 'mass') return (current.mass || []).join('\n');
+    var v = current[f.key];
+    return v == null ? '' : String(v);
+  }
+
+  function loadListing(id) {
+    var data = window.IRVING_DIRECTORY;
+    current = data.resources.filter(function (r) { return r.id === id; })[0] || null;
+
+    var card = document.getElementById('currentCard');
+    if (!current) {
+      card.classList.add('hidden');
+      FIELDS.forEach(function (f) { f.el.value = ''; });
+      el.lat.value = ''; el.lng.value = '';
+      renderDiff();
+      return;
+    }
+
+    card.classList.remove('hidden');
+    document.getElementById('curName').textContent = current.name;
+    document.getElementById('curCat').textContent = IC.categoryLabel(current.category);
+    document.getElementById('curAddr').textContent = current.online
+      ? 'Online / home-based — no address published'
+      : (current.address || '');
+    document.getElementById('curLink').href = 'listing.html?id=' + current.id;
+
+    FIELDS.forEach(function (f) { f.el.value = originalValue(f); });
+    el.lat.value = typeof current.lat === 'number' ? current.lat : '';
+    el.lng.value = typeof current.lng === 'number' ? current.lng : '';
+
+    syncShape();
+    renderDiff();
+  }
+
+  /* Online listings have no address, pin, or hours; only churches and
+     religious houses get the Mass times box. */
+  function syncShape() {
+    var online = !!(current && (current.online ||
+      typeof current.lat !== 'number' || typeof current.lng !== 'number'));
+    var cat = el.category.value;
+
+    addressField.classList.toggle('hidden', online);
+    hoursField.classList.toggle('hidden', online);
+    ordersField.classList.toggle('hidden', !online);
+    massField.classList.toggle('hidden', !(cat === 'church' || cat === 'religious'));
+
+    var addressChanged = !online && current &&
+      IC.trim(el.address.value) !== IC.trim(current.address || '');
+    pinField.classList.toggle('hidden', !addressChanged);
+    if (addressChanged && picker) {
+      picker.build();
+      setTimeout(picker.invalidate, 40);
+    }
+  }
+
+  /* ------------------------------------------------------------- diff */
+
+  function changes() {
+    if (!current) return [];
+    var out = [];
+    FIELDS.forEach(function (f) {
+      if (f.el.closest('.field').classList.contains('hidden')) return;
+      var was = IC.trim(originalValue(f));
+      var now = IC.trim(f.el.value);
+      if (f.clean) { now = f.clean(now); was = f.clean(was); }
+      if (was === now) return;
+      out.push({
+        key: f.key,
+        label: f.label,
+        was: was,
+        now: now,
+        display: f.display,
+        multiline: f.multiline
+      });
+    });
+
+    if (!pinField.classList.contains('hidden') && el.lat.value) {
+      var oldPin = (typeof current.lat === 'number') ? current.lat + ', ' + current.lng : '(none)';
+      var newPin = el.lat.value + ', ' + el.lng.value;
+      if (oldPin !== newPin) out.push({ key: 'lat/lng', label: 'Map pin', was: oldPin, now: newPin });
+    }
+    return out;
+  }
+
+  function show(c, which) {
+    var v = c[which];
+    if (!v) return which === 'was' ? '(empty)' : '(cleared)';
+    if (c.display) return c.display(v);
+    if (c.multiline) return v.split('\n').join(' · ');
+    return v;
+  }
+
+  function renderDiff() {
+    if (isClosureType()) {
+      diffOut.innerHTML = '<div class="diff-empty">' +
+        (current ? '<strong>' + esc(current.name) + '</strong> — ' : '') +
+        esc(updateType().toLowerCase()) + '. We\'ll verify before removing it.</div>';
+      return;
+    }
+    if (!current) {
+      diffOut.innerHTML = '<div class="diff-empty">Pick a listing above first.</div>';
+      return;
+    }
+
+    var cs = isPhotosOnly() ? [] : changes();
+    var photos = IC.photoSummary(form);
+
+    if (!cs.length && !photos.length) {
+      diffOut.innerHTML = '<div class="diff-empty">Nothing changed yet — edit a field above, or attach a photo.</div>';
+      return;
+    }
+
+    var html = '';
+    cs.forEach(function (c) {
+      html += '<div class="diff-row"><div class="k">' + esc(c.label) + '</div><div>' +
+        '<span class="was">' + esc(show(c, 'was')) + '</span>' +
+        '<span class="now">' + esc(show(c, 'now')) + '</span></div></div>';
+    });
+    if (photos.length) {
+      html += '<div class="diff-row"><div class="k">Photos</div><div>' +
+        '<span class="now">' + esc(photos.join(' · ')) + '</span></div></div>';
+    }
+    diffOut.innerHTML = html;
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  /* ---------------------------------------------------- paste-ready JSON */
+
+  /* Clone the live object and lay the edits over it, so keys we never expose
+     (heroPhoto, gallery, placeholder…) survive untouched. */
+  function editedListing() {
+    var out = JSON.parse(JSON.stringify(current));
+    changes().forEach(function (c) {
+      if (c.key === 'lat/lng') {
+        out.lat = parseFloat(el.lat.value);
+        out.lng = parseFloat(el.lng.value);
+      } else if (c.key === 'mass') {
+        if (c.now) out.mass = IC.lines(el.mass.value); else delete out.mass;
+      } else if (!c.now) {
+        if (c.key === 'hours') out.hours = ''; else delete out[c.key];
+      } else {
+        out[c.key] = c.now;
+      }
+    });
+    return out;
+  }
+
+  /* --------------------------------------------------------- wiring up */
+
+  pick.addEventListener('change', function () {
+    loadListing(pick.value);
+    try {
+      history.replaceState(null, '', pick.value ? 'update.html?id=' + pick.value : 'update.html');
+    } catch (e) {}
+  });
+
+  IC.$$('input[name="Update type"]', form).forEach(function (r) {
+    r.addEventListener('change', function () {
+      var closing = isClosureType();
+      editBlock.classList.toggle('hidden', closing || isPhotosOnly());
+      closeBlock.classList.toggle('hidden', !closing);
+      photoBlock.classList.toggle('hidden', closing);
+      summaryCard.classList.toggle('hidden', false);
+      renderDiff();
+    });
+  });
+
+  el.category.addEventListener('change', function () { syncShape(); renderDiff(); });
+  el.address.addEventListener('input', function () { syncShape(); renderDiff(); });
+  form.addEventListener('input', renderDiff);
+  form.addEventListener('change', renderDiff);
+
+  IC.wireCounter(el.blurb, document.getElementById('blurbCount'), 100);
+  IC.wireCounter(el.description, document.getElementById('descCount'), 700);
+  IC.wireAllPhotoSlots(form, function (msg) {
+    IC.showErrors(box, [{ text: msg, el: null }]);
+  });
+
+  var geocodeBtn = document.getElementById('geocodeBtn');
+  picker = IC.createPinPicker({
+    mapEl: document.getElementById('pinMap'),
+    statusEl: document.getElementById('pinStatus'),
+    latInput: el.lat,
+    lngInput: el.lng,
+    onChange: renderDiff
+  });
+  geocodeBtn.addEventListener('click', function () { picker.geocode(el.address, geocodeBtn); });
+
+  /* -------------------------------------------------------- validation */
+
+  form.addEventListener('submit', function (e) {
+    var errs = [];
+
+    if (!current) {
+      errs.push({ text: 'Pick which listing you\'re updating.', el: pick });
+    }
+    if (isClosureType()) {
+      if (IC.trim(el.closereason.value).length < 5) {
+        errs.push({ text: 'Add a line about what happened so we can verify it.', el: el.closereason });
+      }
+    } else {
+      var cs = isPhotosOnly() ? [] : changes();
+      var photos = IC.photoSummary(form);
+      if (!cs.length && !photos.length) {
+        errs.push({
+          text: 'Nothing has changed yet. Edit a field, attach a photo, or use the contact form if you meant something else.',
+          el: el.name
+        });
+      }
+      if (!isPhotosOnly() && !addressField.classList.contains('hidden') &&
+          IC.trim(el.address.value) && !IC.looksIrving(el.address.value)) {
+        errs.push({ text: 'That address doesn\'t look like it\'s in Irving. If the place moved out of the city, choose “it has closed, or moved out of Irving” above.', el: el.address });
+      }
+      if (!pinField.classList.contains('hidden') && el.lat.value &&
+          !IC.insideIrving(parseFloat(el.lat.value), parseFloat(el.lng.value))) {
+        errs.push({ text: 'The map pin is outside the Irving city limits. Drag it inside the dashed outline.', el: geocodeBtn });
+      }
+    }
+
+    if (!IC.trim(el.yourname.value)) errs.push({ text: 'Add your name.', el: el.yourname });
+    if (!IC.isEmail(el.youremail.value)) errs.push({ text: 'Add your email so we can follow up.', el: el.youremail });
+    if (!el.relationship.value) errs.push({ text: 'Tell us your connection to this listing.', el: el.relationship });
+
+    if (IC.showErrors(box, errs)) { e.preventDefault(); return; }
+
+    document.getElementById('gen-listing').value = current.name;
+    document.getElementById('gen-id').value = current.id;
+
+    var photoNames = IC.photoSummary(form);
+    document.getElementById('gen-photos').value = photoNames.length ? photoNames.join(' · ') : 'none attached';
+
+    if (isClosureType()) {
+      document.getElementById('gen-changes').value =
+        updateType() + ' — ' + current.name + ' (' + current.id + ')';
+      document.getElementById('gen-json').value = '';
+      return;
+    }
+
+    var cs2 = isPhotosOnly() ? [] : changes();
+    document.getElementById('gen-changes').value = cs2.length
+      ? cs2.map(function (c) {
+          return c.label + ':\n  was: ' + (c.was || '(empty)') + '\n  now: ' + (c.now || '(cleared)');
+        }).join('\n\n')
+      : 'Photos only — no field changes';
+    document.getElementById('gen-json').value = cs2.length ? IC.stringify(editedListing()) : '';
+  });
+
+  /* ------------------------------------------------------------- init */
+
+  IC.whenData(function (data) {
+    if (!data) {
+      pick.innerHTML = '<option value="">Couldn\'t load the directory — please email ryan@salesfamily.net</option>';
+      return;
+    }
+    fillPicker(data);
+    var id = '';
+    try { id = new URLSearchParams(window.location.search).get('id') || ''; } catch (e) {}
+    if (id && data.resources.some(function (r) { return r.id === id; })) {
+      pick.value = id;
+      loadListing(id);
+    } else {
+      renderDiff();
+    }
+  });
+})();
+</script>
+</body>
+</html>
