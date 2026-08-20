@@ -15,6 +15,11 @@ import { loadDirectory, createReport, repoRoot } from './lib/load-directory.mjs'
    held to the meta-tag rules. */
 const DEPLOYED_PAGES = ['index.html', 'listing.html'];
 
+/* Indexable pages that are not listings, so they are not derivable from the
+   data. Must stay in step with STATIC_PAGES in tools/generate-sitemap.js —
+   if the two drift, the sitemap check below fails and says so. */
+const STATIC_PAGES = ['suggest.html', 'update.html', 'contact.html'];
+
 /* Load order is load-bearing: seo.js reads the directory and rewrites the head
    before support.js paints. */
 const REQUIRED_SCRIPTS = ['directory-data.js', 'seo.js', 'support.js'];
@@ -96,6 +101,7 @@ if (!existsSync(sitemapPath)) {
   const site = [...listed][0]?.match(/^https?:\/\/[^/]+/)?.[0] ?? 'https://irving-catholic.net';
   const expected = new Set([
     `${site}/`,
+    ...STATIC_PAGES.map((p) => `${site}/${p}`),
     ...loadDirectory().resources.filter((r) => !r.placeholder).map((r) => `${site}/listing.html?id=${r.id}`),
   ]);
   for (const loc of expected) {
