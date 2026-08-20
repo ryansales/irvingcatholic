@@ -36,8 +36,13 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
 | `image-slot.js` | Drag-and-drop image placeholder component (used for the intro band image) |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
-| `netlify.toml` | `publish = "."` plus a 301 from `www` to the bare domain |
-| `robots.txt` | Allows all; points at a sitemap that does not exist yet (see Known gaps) |
+| `seo.js` | Per-page title / description / canonical / OG + Twitter tags and JSON-LD, built from `directory-data.js` at load time. Loads in `<head>` before `support.js` |
+| `sitemap.xml` | Generated — run `node tools/generate-sitemap.js` after adding or removing a listing |
+| `tools/generate-sitemap.js` | Regenerates `sitemap.xml`. Run by hand; **not** a build step |
+| `favicon.svg` | Brand-red rounded square with the ✦ mark |
+| `todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
+| `netlify.toml` | `publish = "."`, a 301 from `www` to the bare domain, `X-Robots-Tag: noindex` on the design-source files and README, and a long cache on `/images/*` |
+| `robots.txt` | Allows all except the design-source files, README, and `/tools/`; points at `sitemap.xml` |
 
 The design-source versions of the two pages are `Home.dc.html` and `Resource Detail.dc.html`
 (included in this bundle for reference). `index.html` / `listing.html` are those files with the
@@ -97,7 +102,12 @@ Online-only listings add `online: true`, drop `lat`/`lng`/`address`, and may car
 storefront" section below the map instead of getting a pin.
 
 **Adding a listing is a one-file edit**: append an object to `resources`. The map, sidebar,
-counts, search index, filters, and detail page all pick it up automatically. No build step.
+counts, search index, filters, detail page, structured data, and social tags all pick it up
+automatically. No build step. The one manual follow-up is `node tools/generate-sitemap.js`,
+which rewrites the committed `sitemap.xml`.
+
+A listing carrying `placeholder: true` is treated as not-yet-real: it is left out of `sitemap.xml`
+and its detail page is served `noindex`. Drop the flag when a real business replaces it.
 
 Current contents: **27 listings** — 6 churches, 6 schools, 3 religious/seminaries, 5 ministries,
 3 Catholic businesses, 4 Catholic owned; 3 of those are online-only and are clearly marked
@@ -118,8 +128,8 @@ cd tests && npm install && npm test  # renders the real pages in Chromium
 | --- | --- |
 | `node --check` on every JS file | A syntax error in `directory-data.js` blanks the entire site |
 | `scripts/validate-data.mjs` | Duplicate slugs, unknown categories, missing fields, `https://` creeping into `website`, photo paths that do not exist, coordinates outside Irving, online listings carrying map pins |
-| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `support.js` or `directory-data.js`, missing title/description/canonical/OG tags, `netlify.toml` no longer publishing `.` |
-| `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears, search filters and clears, map pins and the boundary draw, detail pages show name/address/phone/Mass times, an unknown `?id=` degrades gracefully, no uncaught errors |
+| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `.`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
+| `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears and is reachable by a plain link, search filters/clears and `?q=` reopens it, map pins and the boundary draw, detail pages show name/address/phone/Mass times, each carries its own title/canonical/OG tags and parseable JSON-LD, placeholders and unknown `?id=` are `noindex`, no uncaught errors |
 | `.github/workflows/link-check.yml` | Weekly: every listing website and CDN asset still resolves. Files one issue, updates it in place, closes it when clean. Deliberately not on pull requests — a parish's host having a bad morning should not block a merge |
 
 The smoke test serves React, ReactDOM, and Leaflet from `tests/node_modules` instead of unpkg, so
@@ -128,6 +138,9 @@ drift apart the test fails and tells you to move both together.
 
 The three example online listings are reported as a warning, not an error — they ship on purpose
 until real businesses replace them.
+
+Because `seo.js` writes the head at runtime, the tags that matter are asserted on the *rendered*
+page in the smoke test, not on the file. Checking the file would only ever see the fallbacks.
 
 ## Design tokens
 **Colors**
@@ -180,13 +193,17 @@ In roughly the owner's priority order:
    The owner has not yet chosen a direction. Do not build this until they do.
 3. **Footer links are dead.** "Suggest a listing" and "Contact us" need real destinations —
    Netlify Forms is the natural fit given the hosting.
-4. **No sitemap.** `robots.txt` references `/sitemap.xml` which does not exist. Generate it from
-   `resources` (one URL per listing plus the homepage).
-5. **Per-listing social meta.** `listing.html` shares one static title and description, so every
-   listing previews identically when shared. Needs per-listing `og:` tags — which means either a
-   small prerender step or one static file per listing.
-6. **Mobile.** Not yet tested on real devices. The map/sidebar split and the intro band are the
-   likely problem areas.
+4. ~~**No sitemap.**~~ Done — `sitemap.xml` is generated by `tools/generate-sitemap.js`.
+   **Re-run it whenever you add or remove a listing**, or the new page will not be submitted.
+5. ~~**Per-listing social meta.**~~ Partly done — `seo.js` sets per-listing title, description,
+   canonical, OG and Twitter tags at load time. Google renders JS and will see them; **crawlers
+   that do not run JS (Facebook, LinkedIn, Slack, iMessage, Bing's raw fetch) still will not**.
+   Fixing that for real needs a prerender step emitting one static file per listing — see the
+   SEO review for the tradeoff.
+6. **Mobile.** A first responsive pass has landed (`@media` blocks in the `<helmet>` `<style>` of
+   both pages): the map/sidebar split stacks below 900px, the detail grid stacks below 820px, and
+   neither page scrolls horizontally at 390px. Still **not tested on real devices** — verify the
+   map's touch panning and the intro band before calling it done.
 7. **Coordinates.** Owner-supplied and marked approximate in the data file's header comment;
    worth verifying against the real campuses.
 8. **Catholic Owned listings** are being gathered manually by the owner and will arrive as data edits.
@@ -204,8 +221,8 @@ In roughly the owner's priority order:
 
 ## Files in this bundle
 - `index.html`, `listing.html` — the deployed pages
-- `directory-data.js`, `support.js`, `image-slot.js`, `images/blessed-virgin.jpg`
-- `netlify.toml`, `robots.txt`
+- `directory-data.js`, `support.js`, `seo.js`, `image-slot.js`, `images/blessed-virgin.jpg`
+- `netlify.toml`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `tools/generate-sitemap.js`
 - `Home.dc.html`, `Resource Detail.dc.html` — design-source versions of the two pages
 - `scripts/`, `tests/`, `.github/` — the checks described above. None of it is served: Netlify
   publishes the repo root, and the test harness keeps its `package.json` inside `tests/` on

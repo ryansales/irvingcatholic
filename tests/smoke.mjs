@@ -119,6 +119,31 @@ context.on('page', (page) => {
 
 const page = await context.newPage();
 
+/* seo.js rewrites the head at load time, so the tags that matter are the
+   rendered ones — reading the file would only show the fallbacks. */
+const readHead = (target) =>
+  target.evaluate(() => ({
+    title: document.title,
+    canonical: document.querySelector('link[rel="canonical"]')?.href ?? null,
+    description: document.querySelector('meta[name="description"]')?.content ?? null,
+    ogTitle: document.querySelector('meta[property="og:title"]')?.content ?? null,
+    ogDescription: document.querySelector('meta[property="og:description"]')?.content ?? null,
+    robots: document.querySelector('meta[name="robots"]')?.content ?? null,
+    jsonLd: [...document.querySelectorAll('script[type="application/ld+json"]')].map((n) => n.textContent),
+  }));
+
+const parseJsonLd = (blocks) => {
+  const nodes = [];
+  for (const block of blocks) {
+    try {
+      nodes.push(JSON.parse(block));
+    } catch {
+      nodes.push({ '@type': 'UNPARSEABLE' });
+    }
+  }
+  return nodes;
+};
+
 /* ---------- homepage ---------- */
 console.log('index.html');
 await page.goto(`${base}/index.html`, { waitUntil: 'load' });
@@ -155,6 +180,32 @@ check(
   missingOnline.length === 0,
   missingOnline.map((r) => r.id).join(', '),
 );
+
+/* Every detail page has to be reachable by a crawler from the homepage. They
+   were not: the only link to a listing used to live inside Leaflet popup HTML,
+   which is not in the DOM until someone clicks a pin. */
+const linkedIds = await page.evaluate(() =>
+  [...document.querySelectorAll('a[href*="listing.html?id="]')].map(
+    (a) => new URL(a.getAttribute('href'), location.href).searchParams.get('id'),
+  ),
+);
+const unlinked = dir.resources.filter((r) => !linkedIds.includes(r.id));
+check(
+  'every listing is reachable by a plain link from the homepage',
+  unlinked.length === 0,
+  unlinked.map((r) => r.id).join(', '),
+);
+
+const homeHead = await readHead(page);
+const homeLd = parseJsonLd(homeHead.jsonLd);
+const homeTypes = homeLd.map((n) => n['@type']);
+check('the homepage emits structured data', homeLd.length > 0, homeTypes.join(', '));
+check('the homepage structured data parses', !homeTypes.includes('UNPARSEABLE'));
+check('the homepage declares itself a WebSite', homeTypes.includes('WebSite'), homeTypes.join(', '));
+check('the homepage lists its listings as an ItemList', homeTypes.includes('ItemList'), homeTypes.join(', '));
+check('the homepage is canonical to the site root', /^https?:\/\/[^/]+\/$/.test(homeHead.canonical ?? ''), String(homeHead.canonical));
+
+const site = (homeHead.canonical ?? '').replace(/\/$/, '');
 
 for (const cat of Object.values(dir.categories)) {
   check(`category filter "${cat.short}" is offered`, homeText.includes(cat.short));
@@ -218,12 +269,59 @@ for (const r of samples) {
   }
   const backHome = await page.locator('a[href="index.html"]').count();
   check(`${r.id}: links back to the map`, backHome > 0);
+
+  /* Every listing used to share the homepage's canonical, title, and
+     description, which kept all 27 detail pages out of the index. */
+  const head = await readHead(page);
+  check(`${r.id}: title is its own`, head.title.includes(r.name), head.title);
+  check(
+    `${r.id}: canonical points at itself`,
+    head.canonical === `${site}/listing.html?id=${r.id}`,
+    String(head.canonical),
+  );
+  check(`${r.id}: has a description`, (head.description ?? '').length > 20);
+  check(`${r.id}: has og:title and og:description`, !!head.ogTitle && !!head.ogDescription);
+
+  const ld = parseJsonLd(head.jsonLd);
+  check(`${r.id}: structured data parses`, ld.length > 0 && !ld.some((n) => n['@type'] === 'UNPARSEABLE'));
+  check(
+    `${r.id}: structured data names the listing`,
+    ld.some((n) => n.name === r.name || n['@graph']?.some?.((g) => g.name === r.name)),
+  );
+
+  /* Placeholders stand in for businesses that do not exist yet; indexing them
+     would put a fictional business in search results. */
+  const noindexed = /noindex/i.test(head.robots ?? '');
+  check(
+    `${r.id}: ${r.placeholder ? 'placeholder is noindexed' : 'real listing is indexable'}`,
+    noindexed === !!r.placeholder,
+    `robots: ${head.robots ?? 'none'}`,
+  );
 }
 
 /* An unknown ?id= must not throw — a stale share link is a normal event. */
 await page.goto(`${base}/listing.html?id=no-such-listing`, { waitUntil: 'load' });
 const notFoundText = await page.innerText('body');
 check('unknown id degrades gracefully', notFoundText.trim().length > 0);
+const notFoundHead = await readHead(page);
+check(
+  'unknown id is kept out of the index',
+  /noindex/i.test(notFoundHead.robots ?? ''),
+  `robots: ${notFoundHead.robots ?? 'none'} — it renders a real listing, so indexing it would duplicate that page`,
+);
+
+/* ---------- a shared search URL reopens the same search ---------- */
+const seeded = physical[0].name.split(' ').pop();
+await page.goto(`${base}/index.html?q=${encodeURIComponent(seeded)}`, { waitUntil: 'load' });
+await page
+  .waitForFunction((q) => document.querySelector('input[placeholder*="Search"]')?.value === q, seeded, {
+    timeout: 20000,
+  })
+  .then(() => {}, () => {});
+check(
+  `?q=${seeded} seeds the search box`,
+  (await page.evaluate(() => document.querySelector('input[placeholder*="Search"]')?.value ?? '')) === seeded,
+);
 
 check('no uncaught JavaScript errors', pageErrors.length === 0, pageErrors.join(' | '));
 check(

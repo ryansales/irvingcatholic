@@ -1,3 +1,11 @@
 User-agent: *
 Allow: /
+
+# Design-source copies of the two live pages — same content, different URLs.
+Disallow: /Home.dc.html
+Disallow: /Resource%20Detail.dc.html
+Disallow: /README.md
+Disallow: /todo.md
+Disallow: /tools/
+
 Sitemap: https://irving-catholic.net/sitemap.xml

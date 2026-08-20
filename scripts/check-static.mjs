@@ -8,19 +8,24 @@
 */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { createReport, repoRoot } from './lib/load-directory.mjs';
+import { loadDirectory, createReport, repoRoot } from './lib/load-directory.mjs';
 
 /* The pages that actually ship. The *.dc.html design sources are checked for
    broken links too — Netlify publishes the whole directory — but they are not
    held to the meta-tag rules. */
 const DEPLOYED_PAGES = ['index.html', 'listing.html'];
-const REQUIRED_SCRIPTS = ['support.js', 'directory-data.js'];
+
+/* Load order is load-bearing: seo.js reads the directory and rewrites the head
+   before support.js paints. */
+const REQUIRED_SCRIPTS = ['directory-data.js', 'seo.js', 'support.js'];
+
+/* Only the tags that must be in the file. Canonical and the social tags are
+   set per listing by seo.js at runtime, so they are asserted on the rendered
+   head in tests/smoke.mjs instead — a static check here would just be wrong. */
 const REQUIRED_META = [
   { name: 'title', test: (html) => /<title>[^<]{10,}<\/title>/i.test(html) },
   { name: 'meta description', test: (html) => /<meta\s+name="description"\s+content="[^"]{20,}"/i.test(html) },
-  { name: 'canonical link', test: (html) => /<link\s+rel="canonical"\s+href="https:\/\/[^"]+"/i.test(html) },
-  { name: 'og:title', test: (html) => /<meta\s+property="og:title"/i.test(html) },
-  { name: 'og:description', test: (html) => /<meta\s+property="og:description"/i.test(html) },
+  { name: 'og:type', test: (html) => /<meta\s+property="og:type"/i.test(html) },
 ];
 
 const report = createReport('static site');
@@ -65,13 +70,39 @@ for (const page of DEPLOYED_PAGES) {
     continue;
   }
   const html = readFileSync(join(repoRoot, page), 'utf8');
-  for (const script of REQUIRED_SCRIPTS) {
-    if (!html.includes(script)) {
-      report.error(page, `does not load ${script} — the page would render empty`);
+  const positions = REQUIRED_SCRIPTS.map((script) => {
+    const at = html.search(new RegExp(`<script[^>]*src="\\.?/?${script.replace('.', '\\.')}"`, 'i'));
+    if (at === -1) report.error(page, `does not load ${script} — the page would render empty`);
+    return at;
+  });
+  for (let i = 1; i < positions.length; i += 1) {
+    if (positions[i - 1] !== -1 && positions[i] !== -1 && positions[i] < positions[i - 1]) {
+      report.error(page, `loads ${REQUIRED_SCRIPTS[i]} before ${REQUIRED_SCRIPTS[i - 1]} — order matters`);
     }
   }
   for (const { name, test } of REQUIRED_META) {
     if (!test(html)) report.error(page, `missing or too short: ${name}`);
+  }
+}
+
+/* ---------- the hand-run sitemap still matches the data ---------- */
+const sitemapPath = join(repoRoot, 'sitemap.xml');
+if (!existsSync(sitemapPath)) {
+  report.error('sitemap.xml', 'is missing — robots.txt points at it');
+} else {
+  const listed = new Set(
+    [...readFileSync(sitemapPath, 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]),
+  );
+  const site = [...listed][0]?.match(/^https?:\/\/[^/]+/)?.[0] ?? 'https://irving-catholic.net';
+  const expected = new Set([
+    `${site}/`,
+    ...loadDirectory().resources.filter((r) => !r.placeholder).map((r) => `${site}/listing.html?id=${r.id}`),
+  ]);
+  for (const loc of expected) {
+    if (!listed.has(loc)) report.error('sitemap.xml', `does not list ${loc} — run node tools/generate-sitemap.js`);
+  }
+  for (const loc of listed) {
+    if (!expected.has(loc)) report.error('sitemap.xml', `lists ${loc}, which is not a live listing — run node tools/generate-sitemap.js`);
   }
 }
 
