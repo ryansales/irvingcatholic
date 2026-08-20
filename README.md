@@ -36,6 +36,12 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
 | `image-slot.js` | Drag-and-drop image placeholder component (used for the intro band image) |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
+| `contact.html` | Contact form → Netlify Forms (`contact`) |
+| `suggest.html` | Suggest-a-listing form → Netlify Forms (`suggest-a-listing`) |
+| `update.html` | Update-a-listing form → Netlify Forms (`update-a-listing`) |
+| `thanks.html` | Shared success page for all three forms |
+| `forms.css` | Shared styles for the four pages above |
+| `forms.js` | Shared behaviour: validation, slug, Irving check, pin picker, JSON builder |
 | `seo.js` | Per-page title / description / canonical / OG + Twitter tags and JSON-LD, built from `directory-data.js` at load time. Loads in `<head>` before `support.js` |
 | `sitemap.xml` | Generated — run `node tools/generate-sitemap.js` after adding or removing a listing |
 | `tools/generate-sitemap.js` | Regenerates `sitemap.xml`. Run by hand; **not** a build step |
@@ -113,6 +119,59 @@ Current contents: **27 listings** — 6 churches, 6 schools, 3 religious/seminar
 3 Catholic businesses, 4 Catholic owned; 3 of those are online-only and are clearly marked
 `EXAMPLE ONLINE LISTING` in their descriptions (placeholders to be replaced with real businesses).
 
+## The form pages
+`contact.html`, `suggest.html`, and `update.html` are **plain static HTML** — no `<x-dc>`, no
+`support.js`, no DC runtime. That is deliberate: Netlify's form parser reads the deployed markup at
+deploy time and only registers `<form>`s and fields it can see there, so nothing on these pages may
+be created at runtime. They share `forms.css` and `forms.js` and reuse the same tokens, so they
+read as part of the same site.
+
+**Three Netlify forms**, all posting natively (never via `fetch`, which would drop the file
+uploads) and all redirecting to `thanks.html?sent=…`:
+
+| Form name | Page | Notes |
+| --- | --- | --- |
+| `contact` | `contact.html` | Name, email, topic, message, one optional attachment |
+| `suggest-a-listing` | `suggest.html` | Every field in the listing shape, + 4 photos |
+| `update-a-listing` | `update.html` | Prefilled from `directory-data.js`, submits a diff |
+
+Each form carries a `bot-field` honeypot and a hidden `Paste-ready JSON` input.
+
+### The point: paste-ready submissions
+On submit, `forms.js` validates, then writes a **complete listing object** into the hidden
+`Paste-ready JSON` field, keyed and ordered exactly like the entries in `directory-data.js`. The
+notification email therefore arrives with a block that drops straight into the `resources` array —
+slug already generated, website stripped of its protocol, Instagram normalised to `@handle`, Mass
+times split into an array. `update.html` goes further and sends a `What changed` field listing each
+edit as `was:` / `now:`, plus the full edited object with untouched keys (`heroPhoto`, `gallery`,
+`placeholder`) preserved.
+
+### "Only Irving" is enforced geometrically
+`suggest.html` embeds a Leaflet pin picker that draws `irvingBoundary` from `directory-data.js` and
+ray-casts the dropped pin against it. A pin outside the city limits blocks submission — so `lat`/`lng`
+arrive exact and verified rather than needing to be geocoded later. Address lookup uses OpenStreetMap's
+Nominatim (one request per button press, with manual pin-dropping as the fallback). Online/home-based
+listings have no pin, so they're checked against the Irving ZIP list in `forms.js` instead.
+
+### Two paths through the suggest form
+Step 1 branches on **physical vs online/home-based**, matching the two kinds of listing the site
+already renders — the physical path asks for address, pin, and hours; the online path asks for a
+(private) Irving ZIP, ordering note, and socials. Separately, both the suggest page and the contact
+page offer **email as an alternative**: a copy-and-paste checklist plus a `mailto:` button that
+carries over anything already typed, so a submission with photos attached is equally welcome.
+
+### Photos
+Each form takes one **banner** photo (16:9, becomes `heroPhoto`) and up to **three** smaller ones
+(4:3, become `gallery[0..2]`) — matching exactly what `listing.html` renders. Drag-and-drop with
+thumbnail previews, capped at 5 MB per file, with the email route offered for anything larger.
+
+### One-time setup outside this repo
+Netlify Forms notifications are configured in the Netlify UI, not in `netlify.toml`. For submissions
+to reach an inbox: **app.netlify.com → irvingcatholic → Forms → Form notifications → Add
+notification → Email notification**, once per form, sending to `ryan@salesfamily.net`. Until that is
+done, submissions are still captured — they just sit in the Forms tab instead of arriving by email.
+The free plan allows 100 submissions/month.
+
 ## Checks (CI)
 Because there is no build step, nothing catches a bad edit between the commit and the live site —
 so the checks do it. They run on every pull request and every push to `main` (`.github/workflows/ci.yml`),
@@ -182,10 +241,16 @@ speed and failed on CI twice).
    category-colored "View details" button linking to `listing.html?id=`.
 3. **Sidebar list** — the same filtered/searched set as the map, scrollable, count line at the bottom.
 4. **Online section** (`#online`) — "Irving businesses without a storefront", teal-accented cards.
-5. **Footer** — "Irving Catholic" wordmark (no logo), one-line description, and three
-   **non-functional** links: Suggest a listing, Update your information, Contact us (all `href="#"`).
+5. **Footer** — "Irving Catholic" wordmark (no logo), one-line description, and three links:
+   Suggest a listing (`suggest.html`), Update your information (`update.html`), Contact us
+   (`contact.html`).
 
 Search filters map, sidebar, and online section simultaneously, matching name, category, and blurb.
+
+`listing.html` ends with an "Is anything here out of date?" strip — a category-coloured **Suggest an
+edit** button linking to `update.html?id=<slug>` (which loads that listing prefilled) plus a Contact
+us button — followed by the same footer as the homepage. Both mirrored into
+`Resource Detail.dc.html`; the `updateHref` value comes from `renderVals()`.
 
 ## Known gaps / the actual work queue
 In roughly the owner's priority order:
@@ -196,8 +261,8 @@ In roughly the owner's priority order:
 2. **Featured supporters.** A framework exists in the design explorations (category colors, pin
    treatments, detail-page variants) but **nothing is implemented** — no `featured` key in the data.
    The owner has not yet chosen a direction. Do not build this until they do.
-3. **Footer links are dead.** "Suggest a listing" and "Contact us" need real destinations —
-   Netlify Forms is the natural fit given the hosting.
+3. ~~**Footer links are dead.**~~ Done — all three now point at real Netlify Forms pages (see
+   "The form pages"). Remaining: turn on email notifications in the Netlify UI, one per form.
 4. ~~**No sitemap.**~~ Done — `sitemap.xml` is generated by `tools/generate-sitemap.js`.
    **Re-run it whenever you add or remove a listing**, or the new page will not be submitted.
 5. ~~**Per-listing social meta.**~~ Partly done — `seo.js` sets per-listing title, description,
@@ -207,8 +272,9 @@ In roughly the owner's priority order:
    SEO review for the tradeoff.
 6. **Mobile.** A first responsive pass has landed (`@media` blocks in the `<helmet>` `<style>` of
    both pages): the map/sidebar split stacks below 900px, the detail grid stacks below 820px, and
-   neither page scrolls horizontally at 390px. Still **not tested on real devices** — verify the
-   map's touch panning and the intro band before calling it done.
+   neither page scrolls horizontally at 390px. The form pages carry their own breakpoints in
+   `forms.css`. Still **not tested on real devices** — verify the map's touch panning, the intro
+   band, and the suggest page's pin picker before calling it done.
 7. **Coordinates.** Owner-supplied and marked approximate in the data file's header comment;
    worth verifying against the real campuses.
 8. **Catholic Owned listings** are being gathered manually by the owner and will arrive as data edits.
@@ -226,6 +292,8 @@ In roughly the owner's priority order:
 
 ## Files in this bundle
 - `index.html`, `listing.html` — the deployed pages
+- `contact.html`, `suggest.html`, `update.html`, `thanks.html` — the form pages
+- `forms.css`, `forms.js` — shared by the four form pages
 - `directory-data.js`, `support.js`, `seo.js`, `image-slot.js`, `images/blessed-virgin.jpg`
 - `netlify.toml`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `tools/generate-sitemap.js`
 - `Home.dc.html`, `Resource Detail.dc.html` — design-source versions of the two pages
