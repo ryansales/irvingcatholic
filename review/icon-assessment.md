@@ -14,7 +14,8 @@ no-storefront section is effectively empty too.
 | Bucket | Count |
 |---|---|
 | Brick & mortar in Irving — map pins | 10 |
-| No storefront | 45 |
+| No storefront — named businesses (working set) | 21 |
+| No storefront — individuals (held) | 24 |
 | Discarded (outside Irving) | 14 |
 | Removed | 5 |
 | **Total distinct businesses** | **74** |
@@ -30,6 +31,8 @@ Decisions applied in this revision:
 - **A Guaranteed Home Appliance** (Bill Kurtz) removed — Google lists it as permanently closed.
 - The four held businesses (Lorraine Marie Photography, Hope Sipe Photography, Mount Carmel Cleaners,
   Tiny Saints) removed.
+- The no-storefront list is split in two: 21 businesses trading under a name (the working set) and
+  24 individuals trading under their own name (held, not dropped).
 
 80 CSV rows collapse to 74 businesses: Texas Mercy Clinic appears 3× (Catholic Doctor, Doctor, Urgent
 Care), and Joe Morris, Enrique Man, Bebe Bloch, and Laurie DePauw each appear 2×.
@@ -100,45 +103,32 @@ none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
 
 ---
 
-## List 2 — No storefront (45)
+## List 2A — Named businesses, no storefront (21)
 
-Home-based, mobile, or online-only. Each is either verified Irving-based or ICON member-owned with
-nothing in the record placing it outside Irving. Entries marked *held* had no verifiable location at
-all and are kept pending better information.
+Home-based, mobile, or online-only, and trading under a business name. **These are the ones we're
+working with.** Entries marked *held* had no verifiable location and are kept pending better
+information.
 
 ### Food
 | Business | Type | Contact | Notes |
 |---|---|---|---|
 | Saint Honoré Bread Company | Sourdough bakery | (202) 262-7433 · @sainthonoreirving | Cottage bakery in Nichols Park — verified Irving. Christian Lenczowski. |
-| Bascom Bread Co. (Margaret Smillie) | Bakery | margesmillie17@gmail.com · 406-438-5973 | Fresh-milled flour, sourdough, sweets. ICON member. |
-| Zita's TX Bakeshop (Janes Petres) | Italian cookies, cakes | bakesy.shop/b/zitas-tx-bakeshop · 410-271-3960 | Pickup in Irving. ICON member. |
+| Bascom Bread Co. | Bakery | margesmillie17@gmail.com · 406-438-5973 | Margaret Smillie. Fresh-milled flour, sourdough, sweets. ICON member. |
+| Zita's TX Bakeshop | Italian cookies, cakes | bakesy.shop/b/zitas-tx-bakeshop · 410-271-3960 | Janes Petres. Pickup in Irving. ICON member. |
 
 ### Home & trades
 | Business | Type | Contact |
 |---|---|---|
-| Joe Morris | Carpenter / handyman | 469-880-5980 · 817-673-2163 (two rows on the sheet, one person) |
-| Enrique Man | Handyman / HVAC | 469-834-6383 (two rows on the sheet, one person) |
 | ProJoe Construction (Joseph Klassen) | Handyman | 913-749-6821 |
-| Bob Ottaviano | Handyman | 214-766-7973 |
-| Joe Figenshue | Handyman | (214) 458-3224 |
-| **Sullivan Chimney Sweep** (Luke Sullivan) | Chimney sweep, fireplace, dryer vents | 817-914-4898 · sullivanchimneysweep.com — address withheld |
-| Cristian Kercher | HVAC | 682-384-2350 |
-| Hank Tritchka | Gutters | 469-449-4997 |
-| Matt Pierce | Painter | 602-768-0920 |
-| Sebastian Kercher | Power washing | 817-357-7508 |
-| Rafe Butler | Power washing & soft washing | 817-932-5432 · rbutlerwashing@gmail.com |
+| Sullivan Chimney Sweep (Luke Sullivan) | Chimney sweep, fireplace, dryer vents | 817-914-4898 · sullivanchimneysweep.com — address withheld |
 | PB Landscaping, LLC (Peter Butler) | Landscaping, tree, irrigation | pb-landscaping.com · 214-502-7837 — verified Irving-based |
-| Moris Neri | Yardwork, hauling, cleanouts | realrugby@proton.me · 945-247-9534 |
 | Mid-Cities Shed Company (Aaron Alonso) | Sheds | mcshedco.com · (817) 612-6134 — location unverified, held |
 | GF Ranch and Repair (Erik Maki) | Small engine repair | 321-234-2293 — location unverified, held |
-| Martha Villafuerte | Cleaning | 682-465-5674 |
 
 ### Auto
 | Business | Type | Contact |
 |---|---|---|
 | EMP Auto (Eric Palmer) | Mechanic | 817-705-8112 · eric.empauto@gmail.com — no shop address found |
-| Vinny di Lucca | Car detailing | (208) 316-8219 — UD student |
-| Mulvaney Boys | Car detailing | mulvaney1999@protonmail.com — mobile, comes to you |
 
 ### Catholic goods & gifts
 | Business | Type | Contact |
@@ -152,28 +142,64 @@ all and are kept pending better information.
 | Mary Malone Ware | Pottery | marymaloneware.etsy.com |
 | Purple Lamb Fiber Arts (Carla Hanson) | Hand-dyed yarn | purplelambfiberarts.com — "North Texas", held |
 
-### Music & lessons
+### Lessons
 | Business | Type | Contact |
 |---|---|---|
-| Laurie DePauw | Piano/voice teacher; Spelling to Communicate | 314-913-4672 · lauriesings1@yahoo.com (two rows, one person) |
-| Bebe Bloch (Carlson) | Vocalist & pianist; teacher | bebeblochmusic.com · 703-244-1192 (two rows, one person) |
+| Studio Ars Angeli (Anna Dougherty) | Violin lessons | see CSV link — availability only until late July, worth re-confirming |
+
+### Professional & other
+| Business | Type | Contact |
+|---|---|---|
+| VDP Partners LLC (Damien Van der Putten, PA) | Insurance / public adjuster | 817-501-8780 · vdppartners.com — address withheld |
+| Love For Sunday Floral Co. | Silk wedding flowers | loveforsundayco.com — ships to your door, location unverified |
+| Bin There Dump That (Sylvia & Valentas Zhukas) | Dumpster rental | szhukas5@gmail.com — Dallas-metro franchise serving Irving, held |
+
+---
+
+## List 2B — Individuals, held (24)
+
+People offering a service under their own name, with no business name to list. **On hold — not being
+worked for now.** Nothing is wrong with any of these; they are parked, not dropped.
+
+| Person | Service | Contact |
+|---|---|---|
+| Joe Morris | Carpenter / handyman | 469-880-5980 · 817-673-2163 (two rows on the sheet, one person) |
+| Enrique Man | Handyman / HVAC | 469-834-6383 (two rows on the sheet, one person) |
+| Bob Ottaviano | Handyman | 214-766-7973 |
+| Joe Figenshue | Handyman | (214) 458-3224 |
+| Cristian Kercher | HVAC | 682-384-2350 |
+| Hank Tritchka | Gutters | 469-449-4997 |
+| Matt Pierce | Painter | 602-768-0920 |
+| Sebastian Kercher | Power washing | 817-357-7508 |
+| Rafe Butler | Power washing & soft washing | 817-932-5432 · rbutlerwashing@gmail.com |
+| Moris Neri | Yardwork, hauling, cleanouts | realrugby@proton.me · 945-247-9534 |
+| Martha Villafuerte | Cleaning | 682-465-5674 |
+| Vinny di Lucca | Car detailing | (208) 316-8219 — UD student |
+| Mulvaney Boys | Car detailing | mulvaney1999@protonmail.com — mobile, comes to you |
+| Laurie DePauw | Piano/voice teacher; Spelling to Communicate | 314-913-4672 · lauriesings1@yahoo.com |
+| Bebe Bloch (Carlson) | Vocalist & pianist; teacher | bebeblochmusic.com · 703-244-1192 |
 | Matthew Denny | Piano teacher | 818-862-0622 · mdenny@udallas.edu |
 | Max Wilson | Piano teacher | (972) 626-4059 — in-home lessons in and around Irving |
-| Studio Ars Angeli (Anna Dougherty) | Violin lessons | see CSV link — availability only until late July, worth re-confirming |
 | Grace Denny | Violin lessons | 972-655-6706 — lifeguards for City of Irving |
 | Gaby Peters | Swim lessons | countryrose04@gmail.com |
 | Adrian Montes | Tennis lessons | 361-933-6520 |
-
-### Events, professional & other
-| Business | Type | Contact |
-|---|---|---|
-| **VDP Partners LLC** (Damien Van der Putten, PA) | Insurance / public adjuster | 817-501-8780 · vdppartners.com — address withheld |
 | Adrienne Wright | Wedding planner | 214-284-5475 |
-| Love For Sunday Floral Co. | Silk wedding flowers | loveforsundayco.com — ships to your door, location unverified |
 | Laura Sercer | Florist | (404) 538-1097 |
-| Marianna Muller / Dell Adventures | Licensed travel agent | delladventures.com/marianna |
+| Marianna Muller | Licensed travel agent | delladventures.com/marianna — works under the Dell Adventures agency |
 | Dominic Dougherty | Financial advisor | 214-790-2878 — cell only |
-| Bin There Dump That (Sylvia & Valentas Zhukas) | Dumpster rental | szhukas5@gmail.com — Dallas-metro franchise serving Irving, held |
+
+### The judgment calls
+
+Six entries could have gone either way. Flagging them so you can flip any of them:
+
+| Entry | Called it | Why |
+|---|---|---|
+| Sullivan Chimney Sweep | Named | Surname-based, but a registered business with its own website and 158 Yelp reviews. |
+| Mary Malone Ware | Named | A shop brand built on her name, trading on Etsy under that name. |
+| EMP Auto | Named | A real trading name, even though the business has no web presence at all. |
+| Mulvaney Boys | Individual | A family nickname on the sheet, not a registered business name. |
+| Marianna Muller | Individual | The brand is Dell Adventures, a host agency; she is an agent under it, and she is the ICON member. |
+| Bebe Bloch (Carlson) | Individual | Has a website, but it is a personal performer/teacher page, not a business identity. |
 
 ---
 
@@ -228,7 +254,8 @@ all and are kept pending better information.
 | `icon-assessment.md` | This document |
 | `icon-assessment.html` | The published review page |
 | `list-1-physical-irving.csv` | The 10 map listings, with empty `lat`/`lng` columns for the script to fill |
-| `list-2-online-no-storefront.csv` | The 45 no-storefront listings |
+| `list-2a-online-named-businesses.csv` | The 21 named no-storefront businesses — the working set |
+| `list-2b-online-individuals-held.csv` | The 24 individuals, parked for now |
 | `geocode.py` | Geocodes List 1 and boundary-checks every result |
 | `list-1-geocoded.js` | Paste-ready listing objects — created by the first workflow run |
 | `../.github/workflows/geocode.yml` | Runs the geocoder from the GitHub Actions tab |
