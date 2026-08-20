@@ -34,7 +34,7 @@ jobs:
         run: node scripts/check-external-links.mjs --report "${RUNNER_TEMP}/link-report.md"
 
       - name: Report
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           REPORT_PATH: ${{ runner.temp }}/link-report.md
           CHECK_OUTCOME: ${{ steps.check.outcome }}
