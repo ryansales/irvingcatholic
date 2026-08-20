@@ -6,3 +6,32 @@
   to = "https://irving-catholic.net/:splat"
   status = 301
   force = true
+
+# The design-source files and the handoff doc are published alongside the site
+# (publish = "."), so they are reachable URLs that duplicate the real pages.
+# robots.txt asks crawlers not to fetch them; X-Robots-Tag keeps them out of
+# the index even when something links to them directly.
+[[headers]]
+  for = "/Home.dc.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/Resource Detail.dc.html"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/README.md"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/todo.md"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

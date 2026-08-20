@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The site is published straight from the repo with no build step, so these
+# checks are the only gate between a bad edit and production.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Data and static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # A syntax error in directory-data.js takes the whole site down, and
+      # nothing else would catch it before a visitor did.
+      - name: Syntax-check every JavaScript file
+        run: |
+          shopt -s nullglob
+          for file in *.js tools/*.js scripts/*.mjs scripts/lib/*.mjs tests/*.mjs; do
+            echo "checking $file"
+            node --check "$file"
+          done
+
+      - name: Validate directory data
+        run: node scripts/validate-data.mjs
+
+      - name: Check pages, references, and hosting config
+        run: node scripts/check-static.mjs
+
+  smoke:
+    name: Browser smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install test dependencies
+        run: npm ci
+        working-directory: tests
+
+      - name: Cache the browser
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ hashFiles('tests/package-lock.json') }}
+
+      # A no-op once the cache above is warm.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+        working-directory: tests
+
+      - name: Render the pages and check what came out
+        run: npm test
+        working-directory: tests

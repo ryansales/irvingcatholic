@@ -11,13 +11,19 @@ Live domain: **irving-catholic.net** (Netlify, DNS on Netlify nameservers, domai
 Dreamhost). Repo: **ryansales/irvingcatholic**, branch `main`.
 
 ## IMPORTANT: this is not a design mock
-Unlike a typical design handoff, **these HTML files are the shipping site**. They are static,
-dependency-free (Leaflet from CDN only), and deploy as-is. Do not reimplement them in React/Vue
-unless the project owner explicitly asks for a rewrite — the correct default is to keep editing
-these files. A framework rewrite would add a build step and lose the "edit one JSON file to add a
-listing" property that the owner relies on.
+Unlike a typical design handoff, **these HTML files are the shipping site**. They have no build
+step and deploy as-is. Do not reimplement them in React/Vue unless the project owner explicitly
+asks for a rewrite — the correct default is to keep editing these files. A framework rewrite would
+add a build step and lose the "edit one JSON file to add a listing" property that the owner relies
+on.
+
+They are not, however, dependency-free at runtime: `support.js` loads **React 18 and ReactDOM from
+unpkg** and renders the pages client-side, and both pages load **Leaflet** from unpkg as well. If
+unpkg is unreachable the pages render completely blank — there is no server-rendered fallback. See
+Known gaps.
 
 Fidelity: **high** — final colors, type, spacing, and copy.
+
 
 ## Repo layout (what is deployed)
 Files sit at the repo root; Netlify publishes `.` with no build command.
@@ -30,8 +36,13 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
 | `image-slot.js` | Drag-and-drop image placeholder component (used for the intro band image) |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
-| `netlify.toml` | `publish = "."` plus a 301 from `www` to the bare domain |
-| `robots.txt` | Allows all; points at a sitemap that does not exist yet (see Known gaps) |
+| `seo.js` | Per-page title / description / canonical / OG + Twitter tags and JSON-LD, built from `directory-data.js` at load time. Loads in `<head>` before `support.js` |
+| `sitemap.xml` | Generated — run `node tools/generate-sitemap.js` after adding or removing a listing |
+| `tools/generate-sitemap.js` | Regenerates `sitemap.xml`. Run by hand; **not** a build step |
+| `favicon.svg` | Brand-red rounded square with the ✦ mark |
+| `todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
+| `netlify.toml` | `publish = "."`, a 301 from `www` to the bare domain, `X-Robots-Tag: noindex` on the design-source files and README, and a long cache on `/images/*` |
+| `robots.txt` | Allows all except the design-source files, README, and `/tools/`; points at `sitemap.xml` |
 
 The design-source versions of the two pages are `Home.dc.html` and `Resource Detail.dc.html`
 (included in this bundle for reference). `index.html` / `listing.html` are those files with the
@@ -91,11 +102,50 @@ Online-only listings add `online: true`, drop `lat`/`lng`/`address`, and may car
 storefront" section below the map instead of getting a pin.
 
 **Adding a listing is a one-file edit**: append an object to `resources`. The map, sidebar,
-counts, search index, filters, and detail page all pick it up automatically. No build step.
+counts, search index, filters, detail page, structured data, and social tags all pick it up
+automatically. No build step. The one manual follow-up is `node tools/generate-sitemap.js`,
+which rewrites the committed `sitemap.xml`.
+
+A listing carrying `placeholder: true` is treated as not-yet-real: it is left out of `sitemap.xml`
+and its detail page is served `noindex`. Drop the flag when a real business replaces it.
 
 Current contents: **27 listings** — 6 churches, 6 schools, 3 religious/seminaries, 5 ministries,
 3 Catholic businesses, 4 Catholic owned; 3 of those are online-only and are clearly marked
 `EXAMPLE ONLINE LISTING` in their descriptions (placeholders to be replaced with real businesses).
+
+## Checks (CI)
+Because there is no build step, nothing catches a bad edit between the commit and the live site —
+so the checks do it. They run on every pull request and every push to `main` (`.github/workflows/ci.yml`),
+and they need no dependencies beyond Node 22 except for the browser test.
+
+```sh
+node scripts/validate-data.mjs     # directory-data.js is sane
+node scripts/check-static.mjs      # pages, local references, hosting config
+cd tests && npm install && npm test  # renders the real pages in Chromium
+```
+
+| Check | What it protects |
+| --- | --- |
+| `node --check` on every JS file | A syntax error in `directory-data.js` blanks the entire site |
+| `scripts/validate-data.mjs` | Duplicate slugs, unknown categories, missing fields, `https://` creeping into `website`, photo paths that do not exist, coordinates outside Irving, online listings carrying map pins |
+| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `.`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
+| `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears and is reachable by a plain link, search filters/clears and `?q=` reopens it, map pins and the boundary draw, detail pages show name/address/phone/Mass times, each carries its own title/canonical/OG tags and parseable JSON-LD, placeholders and unknown `?id=` are `noindex`, no uncaught errors |
+| `.github/workflows/link-check.yml` | Weekly: every listing website and CDN asset still resolves. Files one issue, updates it in place, closes it when clean. Deliberately not on pull requests — a parish's host having a bad morning should not block a merge |
+
+The smoke test serves React, ReactDOM, and Leaflet from `tests/node_modules` instead of unpkg, so
+CI never depends on a CDN. Those versions are pinned to exactly what the pages request; if they
+drift apart the test fails and tells you to move both together.
+
+The three example online listings are reported as a warning, not an error — they ship on purpose
+until real businesses replace them.
+
+Because `seo.js` writes the head at runtime, the tags that matter are asserted on the *rendered*
+page in the smoke test, not on the file. Checking the file would only ever see the fallbacks.
+
+`SMOKE_CPU_THROTTLE=4 npm test` runs the browser test with the CPU slowed to roughly what a shared
+CI runner gives you. Worth using before pushing anything that touches the map: this site has
+timing-sensitive map code, and a laptop is fast enough to hide it (issue #4 passed locally at full
+speed and failed on CI twice).
 
 ## Design tokens
 **Colors**
@@ -148,16 +198,25 @@ In roughly the owner's priority order:
    The owner has not yet chosen a direction. Do not build this until they do.
 3. **Footer links are dead.** "Suggest a listing" and "Contact us" need real destinations —
    Netlify Forms is the natural fit given the hosting.
-4. **No sitemap.** `robots.txt` references `/sitemap.xml` which does not exist. Generate it from
-   `resources` (one URL per listing plus the homepage).
-5. **Per-listing social meta.** `listing.html` shares one static title and description, so every
-   listing previews identically when shared. Needs per-listing `og:` tags — which means either a
-   small prerender step or one static file per listing.
-6. **Mobile.** Not yet tested on real devices. The map/sidebar split and the intro band are the
-   likely problem areas.
+4. ~~**No sitemap.**~~ Done — `sitemap.xml` is generated by `tools/generate-sitemap.js`.
+   **Re-run it whenever you add or remove a listing**, or the new page will not be submitted.
+5. ~~**Per-listing social meta.**~~ Partly done — `seo.js` sets per-listing title, description,
+   canonical, OG and Twitter tags at load time. Google renders JS and will see them; **crawlers
+   that do not run JS (Facebook, LinkedIn, Slack, iMessage, Bing's raw fetch) still will not**.
+   Fixing that for real needs a prerender step emitting one static file per listing — see the
+   SEO review for the tradeoff.
+6. **Mobile.** A first responsive pass has landed (`@media` blocks in the `<helmet>` `<style>` of
+   both pages): the map/sidebar split stacks below 900px, the detail grid stacks below 820px, and
+   neither page scrolls horizontally at 390px. Still **not tested on real devices** — verify the
+   map's touch panning and the intro band before calling it done.
 7. **Coordinates.** Owner-supplied and marked approximate in the data file's header comment;
    worth verifying against the real campuses.
 8. **Catholic Owned listings** are being gathered manually by the owner and will arrive as data edits.
+9. **unpkg is a single point of failure.** React, ReactDOM, and Leaflet are all fetched from
+   unpkg at page load and everything is rendered client-side, so an unpkg outage — or a visitor
+   on a network that blocks it — gets a blank page, not a degraded one. Vendoring those four
+   files into the repo and pointing the tags at local paths would remove the dependency without
+   introducing a build step. The weekly link check watches unpkg but cannot prevent the outage.
 
 ## Assets
 - `images/blessed-virgin.jpg` — 418×512 engraving of Saint Mary the Blessed Virgin, public domain,
@@ -167,6 +226,9 @@ In roughly the owner's priority order:
 
 ## Files in this bundle
 - `index.html`, `listing.html` — the deployed pages
-- `directory-data.js`, `support.js`, `image-slot.js`, `images/blessed-virgin.jpg`
-- `netlify.toml`, `robots.txt`
+- `directory-data.js`, `support.js`, `seo.js`, `image-slot.js`, `images/blessed-virgin.jpg`
+- `netlify.toml`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `tools/generate-sitemap.js`
 - `Home.dc.html`, `Resource Detail.dc.html` — design-source versions of the two pages
+- `scripts/`, `tests/`, `.github/` — the checks described above. None of it is served: Netlify
+  publishes the repo root, and the test harness keeps its `package.json` inside `tests/` on
+  purpose so that Netlify does not start installing dependencies on every deploy.

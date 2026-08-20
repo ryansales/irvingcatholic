@@ -1,0 +1,23 @@
+name: Correct a listing
+description: Wrong hours, a moved parish, a dead link, a bad map pin
+title: 'Correction: '
+labels: [correction]
+body:
+  - type: input
+    id: listing
+    attributes:
+      label: Which listing?
+      description: The name, or the id from the page URL (`listing.html?id=…`).
+    validations:
+      required: true
+  - type: textarea
+    id: wrong
+    attributes:
+      label: What is wrong, and what should it say?
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: How do you know?
+      placeholder: Parish bulletin, called the office, I work there…

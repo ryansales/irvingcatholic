@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Irving Catholic — a living map of Catholic life in Irving, Texas</title>
-<meta name="description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
+<title>Irving Catholic — Catholic Churches, Schools &amp; Businesses in Irving, TX</title>
+<meta name="description" content="A living map of Catholic life in Irving, Texas: Mass times and contact details for every parish, plus Catholic schools, seminaries, religious houses, ministries, and Catholic-owned businesses.">
 <link rel="canonical" href="https://irving-catholic.net/">
-<meta property="og:title" content="Irving Catholic — a living map of Catholic life in Irving, Texas">
-<meta property="og:description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
+<meta name="theme-color" content="#bf4a3c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
+<meta property="og:image:alt" content="Engraving of Saint Mary the Blessed Virgin">
+<script src="./directory-data.js"></script>
+<script src="./seo.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -25,6 +28,23 @@
   <script src="directory-data.js"></script>
   <style>
     body{margin:0}
+    /* Mobile layout. The page is built from inline styles, so these overrides
+       need !important to win. Breakpoint 900px is where the 392px sidebar plus
+       a usable map stops fitting side by side. */
+    @media (max-width:900px){
+      .ic-mapsplit{flex-direction:column!important;height:auto!important}
+      .ic-sidebar{width:100%!important;border-right:none!important;border-bottom:1px solid #ece6da!important;max-height:420px!important}
+      .ic-mapcol{height:400px!important;flex:none!important}
+      .ic-onlinegrid{grid-template-columns:1fr 1fr!important}
+      .ic-footgrid{grid-template-columns:1fr!important;gap:28px!important}
+    }
+    @media (max-width:640px){
+      .ic-pad{padding-left:18px!important;padding-right:18px!important}
+      .ic-intro{padding-top:32px!important;padding-bottom:34px!important}
+      .ic-intro h1{font-size:32px!important}
+      .ic-intro p{font-size:16px!important}
+      .ic-onlinegrid{grid-template-columns:1fr!important}
+    }
     a{color:#bf4a3c}
     a:hover{color:#9a3529}
     .marker-cluster{background:rgba(191,74,60,.22)!important}
@@ -45,10 +65,10 @@
   <!-- intro -->
   <div style="position:relative;overflow:hidden">
     <div style="position:absolute;inset:0">
-      <image-slot id="intro-band" shape="rect" fit="contain" src="./images/blessed-virgin.jpg" style="background:transparent;mix-blend-mode:multiply;opacity:.72;-webkit-mask-image:radial-gradient(ellipse 19% 34% at 50% 26%,#000 20%,transparent 78%);mask-image:radial-gradient(ellipse 19% 34% at 50% 26%,#000 20%,transparent 78%)" placeholder="Drop a devotional image"></image-slot>
+      <image-slot id="intro-band" shape="rect" fit="contain" src="./images/blessed-virgin.jpg" style="background:transparent;mix-blend-mode:multiply;opacity:.72;-webkit-mask-image:radial-gradient(ellipse 19% 48% at 50% 38%,#000 20%,transparent 78%);mask-image:radial-gradient(ellipse 19% 48% at 50% 38%,#000 20%,transparent 78%)" placeholder="Drop a devotional image"></image-slot>
     </div>
     <div style="position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,#f4efe5 0%,rgba(244,239,229,.42) 26%,rgba(244,239,229,.46) 74%,#f4efe5 100%)"></div>
-  <section style="position:relative;pointer-events:none;max-width:720px;margin:0 auto;padding:44px 34px 46px;text-align:center">
+  <section class="ic-pad ic-intro" style="position:relative;pointer-events:none;max-width:720px;margin:0 auto;padding:44px 34px 46px;text-align:center">
     <div style="display:inline-flex;align-items:center;gap:9px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:#bf4a3c;margin-bottom:22px">
       <span style="width:20px;height:1.5px;background:#d9a99a"></span>Irving Catholic<span style="width:20px;height:1.5px;background:#d9a99a"></span>
     </div>
@@ -69,10 +89,10 @@
   </div>
 
   <!-- map -->
-  <section style="max-width:1220px;margin:0 auto;padding:0 34px 70px">
-    <div style="display:flex;width:100%;height:640px;background:#fff;border:1px solid #e7e0d2;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden">
+  <section class="ic-pad" style="max-width:1220px;margin:0 auto;padding:0 34px 70px">
+    <div class="ic-mapsplit" style="display:flex;width:100%;height:640px;background:#fff;border:1px solid #e7e0d2;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden">
       <!-- list -->
-      <div style="width:392px;flex:none;display:flex;flex-direction:column;border-right:1px solid #ece6da;background:#f4efe5">
+      <div class="ic-sidebar" style="width:392px;flex:none;display:flex;flex-direction:column;border-right:1px solid #ece6da;background:#f4efe5">
         <div style="padding:24px 24px 16px;border-bottom:1px solid #f0ebe1">
           <div style="font-family:'Newsreader',serif;font-size:22px;font-weight:500;color:#2b2620;margin-bottom:3px">Explore the directory</div>
           <div style="font-size:13px;color:#a99a83;margin-bottom:15px">Filter by category, then hover or select</div>
@@ -94,7 +114,7 @@
                 <span style="{{ r.dotStyle }}"></span>
                 <div style="flex:1;min-width:0">
                   <div style="display:flex;align-items:center;gap:7px">
-                    <span style="font-family:'Newsreader',serif;font-size:16.5px;color:#2b2620;font-weight:500;line-height:1.15">{{ r.name }}</span>
+                    <a href="{{ r.href }}" onClick="{{ r.stop }}" style="font-family:'Newsreader',serif;font-size:16.5px;color:#2b2620;font-weight:500;line-height:1.15;text-decoration:none">{{ r.name }}</a>
                     <span style="{{ r.badgeStyle }}">Example</span>
                   </div>
                   <div style="font-size:10px;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-top:3px;color:{{ r.color }}">{{ r.catLabel }}</div>
@@ -106,7 +126,7 @@
         </div>
       </div>
       <!-- map -->
-      <div style="flex:1;position:relative">
+      <div class="ic-mapcol" style="flex:1;position:relative">
         <div id="homeMapHost" style="position:absolute;inset:0"></div>
         <div style="position:absolute;left:16px;bottom:16px;z-index:500;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid #ece6da;border-radius:11px;box-shadow:0 6px 20px rgba(40,30,15,.12);padding:8px 13px;font-size:12px;color:#6b6356">
           <strong style="color:#2b2620">{{ count }}</strong> of {{ total }} shown · near University of Dallas
@@ -120,7 +140,7 @@
 
   <!-- online & home-based -->
   <sc-if value="{{ hasOnline }}" hint-placeholder-val="{{ true }}">
-    <section id="online" style="max-width:1220px;margin:0 auto;padding:8px 34px 76px">
+    <section id="online" class="ic-pad" style="max-width:1220px;margin:0 auto;padding:8px 34px 76px">
       <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:8px;flex-wrap:wrap">
         <div style="max-width:640px">
           <div style="display:inline-flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:#2f7d8c;margin-bottom:12px">
@@ -132,7 +152,7 @@
         <div style="font-size:13px;color:#a99a83;white-space:nowrap"><strong style="color:#2b2620">{{ onlineCount }}</strong> {{ onlineCountLabel }}</div>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:24px">
+      <div class="ic-onlinegrid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:24px">
         <sc-if value="{{ onlineNoMatch }}" hint-placeholder-val="{{ false }}">
           <div style="grid-column:1 / -1;padding:26px 18px;text-align:center;color:#a99a83;font-size:13.5px">No online or home-based listings match your search.</div>
         </sc-if>
@@ -162,7 +182,7 @@
 
   <!-- footer -->
   <footer style="background:#efe8da;border-top:1px solid #e2d9c8">
-    <div style="max-width:1220px;margin:0 auto;padding:52px 34px 30px;display:grid;grid-template-columns:1.5fr 1fr;gap:40px">
+    <div class="ic-footgrid ic-pad" style="max-width:1220px;margin:0 auto;padding:52px 34px 30px;display:grid;grid-template-columns:1.5fr 1fr;gap:40px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
           <span style="font-family:'Newsreader',serif;font-size:17px;color:#2b2620">Irving Catholic</span>
@@ -186,10 +206,21 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+function initialQuery() {
+  try { return new URLSearchParams(window.location.search).get('q') || ''; }
+  catch (e) { return ''; }
+}
+function syncQueryParam(q) {
+  try {
+    const url = new URL(window.location.href);
+    if (q) url.searchParams.set('q', q); else url.searchParams.delete('q');
+    window.history.replaceState(null, '', url.pathname + url.search + url.hash);
+  } catch (e) {}
+}
 class Component extends DCLogic {
   state = {
-    active: { church: true, school: true, religious: true, business: true, ministry: true },
-    hoveredId: null, selectedId: null, menuOpen: false, query: ''
+    active: Object.fromEntries(Object.keys(window.IRVING_DIRECTORY.categories).map(k => [k, true])),
+    hoveredId: null, selectedId: null, menuOpen: false, query: initialQuery()
   };
   map = null;
   markers = {};
@@ -370,10 +401,13 @@ class Component extends DCLogic {
     this.buildMap(host);
   }
   onSearch(e) {
-    this.setState({ query: e.target.value });
+    const q = e.target.value;
+    this.setState({ query: q });
+    syncQueryParam(q);
   }
   clearSearch() {
     this.setState({ query: '' });
+    syncQueryParam('');
   }
   toggleCat(key) {
     this.setState(s => ({ active: { ...s.active, [key]: !s.active[key] } }));
@@ -423,9 +457,11 @@ class Component extends DCLogic {
         cardStyle: 'padding:13px 15px;border-radius:13px;border:1.5px solid ' + (hl ? meta.color : '#ece6da') + ';background:' + (hl ? '#fbf7f0' : '#fff') + ';cursor:pointer;transition:all .15s;margin-bottom:10px;box-shadow:' + (hl ? '0 6px 18px rgba(40,30,15,.10)' : 'none'),
         dotStyle: 'width:11px;height:11px;border-radius:50%;flex:none;margin-top:5px;background:' + meta.color,
         badgeStyle: r.placeholder ? 'font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#a39780;background:#f0ebe1;border-radius:5px;padding:2px 5px' : 'display:none',
+        href: 'listing.html?id=' + r.id,
         onClick: () => this.selectResource(r.id),
         onEnter: () => this.hoverResource(r.id),
-        onLeave: () => this.unhover()
+        onLeave: () => this.unhover(),
+        stop: (e) => e.stopPropagation()
       };
     });
 
