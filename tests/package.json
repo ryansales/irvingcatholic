@@ -1,0 +1,17 @@
+{
+  "name": "irving-catholic-tests",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Browser smoke test for the site. Kept out of the repo root on purpose: Netlify publishes '.' with no build command, and a root package.json would make it start installing dependencies on every deploy.",
+  "type": "module",
+  "scripts": {
+    "test": "node smoke.mjs"
+  },
+  "devDependencies": {
+    "leaflet": "1.9.4",
+    "leaflet.markercluster": "1.5.3",
+    "playwright": "1.56.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}

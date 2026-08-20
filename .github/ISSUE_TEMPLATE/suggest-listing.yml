@@ -1,0 +1,71 @@
+name: Suggest a listing
+description: Add a church, school, ministry, or Catholic-owned business to the directory
+title: 'Listing: '
+labels: [listing]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Everything here maps to one entry in `directory-data.js`. The more of it
+        you fill in, the closer the listing is to being a copy-and-paste edit.
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      placeholder: St. Luke Catholic Church
+    validations:
+      required: true
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: |
+        "Catholic Businesses" provide a Catholic product or service. "Catholic
+        Owned" is any business — mechanic, café, shop — owned by a local Catholic.
+      options:
+        - Churches & Parishes (church)
+        - Schools & Universities (school)
+        - Orders & Seminaries (religious)
+        - Catholic Businesses (business)
+        - Ministries & Non-profits (ministry)
+        - Catholic Owned (owned)
+    validations:
+      required: true
+  - type: input
+    id: address
+    attributes:
+      label: Street address
+      description: Leave blank if there is no storefront — it will be listed as online / home-based instead.
+      placeholder: 202 S MacArthur Blvd, Irving, TX 75060
+  - type: input
+    id: contact
+    attributes:
+      label: Phone, website, or Instagram
+      placeholder: (972) 259-3222 · stlukeirving.org · @handle
+    validations:
+      required: true
+  - type: input
+    id: hours
+    attributes:
+      label: Hours
+      placeholder: Office Mon-Fri 9am-5pm
+  - type: textarea
+    id: mass
+    attributes:
+      label: Mass times
+      description: Churches only. One per line.
+      placeholder: |
+        Sat Vigil 5:30pm
+        Sun 8am, 10am, 12pm
+  - type: textarea
+    id: description
+    attributes:
+      label: What is it?
+      description: A sentence or two. A short version becomes the card blurb; the longer one becomes the detail page.
+    validations:
+      required: true
+  - type: input
+    id: relationship
+    attributes:
+      label: Your connection to it
+      placeholder: Parishioner, owner, neighbor…

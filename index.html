@@ -188,7 +188,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    active: { church: true, school: true, religious: true, business: true, ministry: true },
+    active: Object.fromEntries(Object.keys(window.IRVING_DIRECTORY.categories).map(k => [k, true])),
     hoveredId: null, selectedId: null, menuOpen: false, query: ''
   };
   map = null;
