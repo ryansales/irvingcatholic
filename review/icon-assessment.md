@@ -69,22 +69,31 @@ OpenStreetMap itself all return 403 at the proxy; `maps.googleapis.com` is reach
 keyless requests. Web search is not a substitute: it returned nothing for six of the nine addresses
 and unverifiable numbers for the rest, and a wrong pin on a live map is worse than a missing one.
 
-So the geocoding is packaged as a script instead — `review/geocode.py`. Run it from the repo root on
-any machine with normal internet:
+So the geocoding runs on GitHub Actions instead — no local machine, no terminal, all browser:
 
-```
-python3 review/geocode.py
-```
+1. Open the repo on github.com and click the **Actions** tab.
+2. Pick **Geocode List 1 addresses** in the left sidebar.
+3. Click **Run workflow**, choose the branch `claude/irving-business-assessment-ne2iuq`,
+   and press the green **Run workflow** button.
 
-It geocodes every address in `review/list-1-physical-irving.csv` (US Census geocoder first,
-Nominatim as fallback — both free, neither needs a key), writes the coordinates back into that CSV,
-and prints listing objects ready to paste into the `resources` array.
+The runner has normal internet access, so it geocodes all ten addresses (US Census geocoder first,
+Nominatim as fallback — both free, neither needs a key) and commits two files back to the branch:
+
+- `review/list-1-physical-irving.csv` — now with `lat`, `lng`, which geocoder answered, and an
+  `In Irving` column
+- `review/list-1-geocoded.js` — the ten listing objects, ready to paste into the `resources` array
+  in `directory-data.js`
 
 Every result is checked against the 201-point municipal boundary already in `directory-data.js` and
 flagged `NO - CHECK` if it lands outside. That check is tested and working: all 24 existing Irving
 listings pass it, and Coppell, Dallas, Fort Worth, Flower Mound, and the DFW Airport centroid are all
-correctly rejected. If a geocoder is unreachable the script reports the miss and exits non-zero
-rather than guessing.
+correctly rejected. If an address misses or lands outside the boundary, the run still commits the
+coordinates that did resolve and leaves a warning on the run summary naming the ones to look at.
+
+The script itself is `review/geocode.py` if you ever do want to run it directly. It has been tested
+end to end against mocked geocoder responses — census hit, census miss falling through to Nominatim,
+census unreachable falling through to Nominatim, and an out-of-boundary result — so the first real
+run should not be its first exercise.
 
 Address-level sanity in the meantime: all ten sit in core Irving ZIPs — 75039, 75060, 75061, 75062 —
 none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
@@ -203,8 +212,9 @@ all and are kept pending better information.
 
 ## What's left before List 1 goes live
 
-1. Run `python3 review/geocode.py` and paste the resulting objects into `resources`
-   in `directory-data.js`. Rows 5 and 8 can reuse 32.884692, -96.949608.
+1. Run the **Geocode List 1 addresses** workflow from the Actions tab, then paste
+   `review/list-1-geocoded.js` into `resources` in `directory-data.js`. Rows 5 and 8 can reuse
+   32.884692, -96.949608 if you would rather not wait on the geocoder for those two.
 2. Write a one-line `blurb` and a short `description` for each. The ICON comments are good raw
    material and several are directly quotable.
 3. Confirm each business wants to be listed — especially the four medical practices, which did not
@@ -220,4 +230,6 @@ all and are kept pending better information.
 | `list-1-physical-irving.csv` | The 10 map listings, with empty `lat`/`lng` columns for the script to fill |
 | `list-2-online-no-storefront.csv` | The 45 no-storefront listings |
 | `geocode.py` | Geocodes List 1 and boundary-checks every result |
+| `list-1-geocoded.js` | Paste-ready listing objects — created by the first workflow run |
+| `../.github/workflows/geocode.yml` | Runs the geocoder from the GitHub Actions tab |
 | `ICON-source.csv` | The original sheet, unmodified |

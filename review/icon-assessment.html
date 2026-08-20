@@ -527,7 +527,7 @@
   <section>
     <div class="sec-head">
       <span class="sec-tag" style="--tone: var(--hold)">Geocoding</span>
-      <h2>The coordinates come from a script, not from me</h2>
+      <h2>The coordinates come from a workflow you click, not from me</h2>
       <p class="sec-note">
         I could not geocode from this session. The egress policy blocks every geocoding host &mdash; the
         US Census geocoder, Nominatim, Photon, Geoapify, ArcGIS, the City of Irving's own GIS server,
@@ -537,22 +537,37 @@
       <p class="sec-note">
         Web search is not a substitute. It returned nothing for six of the nine addresses and
         unverifiable numbers for the rest &mdash; and a wrong pin on a live map is worse than a missing
-        one. So the geocoding is packaged as a script you run instead.
+        one. So the geocoding runs on GitHub Actions instead: no local machine, no terminal, all
+        browser.
       </p>
     </div>
-    <div class="callout" style="--tone: var(--hold)">
-      <strong>Run this from the repo root:</strong> <code>python3 review/geocode.py</code><br>
-      It geocodes every address in <code>list-1-physical-irving.csv</code> &mdash; US Census geocoder
-      first, Nominatim as fallback, neither needs an API key &mdash; writes the coordinates back into
-      that CSV, and prints listing objects ready to paste into <code>resources</code>.
-    </div>
+    <ol class="steps">
+      <li>Open the repo on github.com and click the <strong>Actions</strong> tab.</li>
+      <li>Pick <strong>Geocode List 1 addresses</strong> in the left sidebar.</li>
+      <li>Click <strong>Run workflow</strong>, choose the branch <code>claude/irving-business-assessment-ne2iuq</code>, and press the green <strong>Run workflow</strong> button.</li>
+    </ol>
+    <p class="sec-note">
+      The runner has normal internet access, so it geocodes all ten addresses &mdash; US Census
+      geocoder first, Nominatim as fallback, neither needs an API key &mdash; and commits two files
+      back to the branch: <code>review/list-1-physical-irving.csv</code> with <code>lat</code>,
+      <code>lng</code>, the geocoder that answered, and an <code>In Irving</code> column; and
+      <code>review/list-1-geocoded.js</code>, the ten listing objects ready to paste into
+      <code>resources</code>.
+    </p>
     <p class="sec-note">
       Every result is checked against the 201-point municipal boundary already in
       <code>directory-data.js</code> and flagged if it lands outside. That check is tested and working:
       all 24 existing Irving listings pass it, and Coppell, Dallas, Fort Worth, Flower Mound, and the
-      DFW Airport centroid are all correctly rejected. If a geocoder is unreachable the script reports
-      the miss and exits non-zero rather than guessing.
+      DFW Airport centroid are all correctly rejected. If an address misses or lands outside the
+      boundary, the run still commits the coordinates that did resolve and leaves a warning on the run
+      summary naming the ones to look at.
     </p>
+    <div class="callout" style="--tone: var(--hold)">
+      <strong>The script has already been exercised.</strong> <code>review/geocode.py</code> was tested
+      end to end against mocked geocoder responses &mdash; census hit, census miss falling through to
+      Nominatim, census unreachable falling through to Nominatim, and an out-of-boundary result &mdash;
+      so the first real run will not be its first exercise.
+    </div>
     <p class="sec-note">
       Address-level sanity in the meantime: all ten sit in core Irving ZIPs &mdash; 75039, 75060, 75061,
       75062 &mdash; none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
@@ -724,7 +739,7 @@
       <h2>What's left to do</h2>
     </div>
     <ol class="steps">
-      <li>Run <code>python3 review/geocode.py</code> and paste the resulting objects into <code>resources</code> in <code>directory-data.js</code>. Rows 5 and 8 can reuse 32.884692, -96.949608.</li>
+      <li>Run the <strong>Geocode List 1 addresses</strong> workflow from the Actions tab, then paste <code>review/list-1-geocoded.js</code> into <code>resources</code> in <code>directory-data.js</code>. Rows 5 and 8 can reuse 32.884692, -96.949608 if you would rather not wait on the geocoder for those two.</li>
       <li>Write a one-line <code>blurb</code> and a short <code>description</code> for each. The ICON comments are good raw material and several are directly quotable.</li>
       <li>Confirm each business wants to be listed &mdash; especially the four medical practices, which did not submit themselves.</li>
       <li>Replace the three <code>EXAMPLE ONLINE LISTING</code> placeholders as the first real no-storefront entries land.</li>
