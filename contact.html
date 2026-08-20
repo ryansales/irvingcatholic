@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contact us — Irving Catholic</title>
+<meta name="description" content="Get in touch with Irving Catholic — questions, corrections, photos, or anything else about the directory.">
+<link rel="canonical" href="https://irving-catholic.net/contact.html">
+<meta property="og:title" content="Contact us — Irving Catholic">
+<meta property="og:description" content="Get in touch with Irving Catholic — questions, corrections, photos, or anything else about the directory.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./forms.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← Back to the map</a>
+  <a class="wordmark" href="index.html">
+    <span class="mark">✦</span>
+    <span class="name">Irving Catholic</span>
+  </a>
+</div>
+
+<div class="wrap">
+
+  <div class="pagehead">
+    <div class="eyebrow">Contact us</div>
+    <h1 class="display">Say hello, or tell us<br>what we got wrong</h1>
+    <p class="lede">Irving Catholic is a small, community-maintained directory — one person keeps it up to date. Questions, corrections, photos, a parish that's missing, an idea for the site: it all comes to the same inbox and gets read.</p>
+  </div>
+
+  <div class="aside">
+    <p><strong>Looking to add or fix a listing?</strong> Those have their own forms, and they capture everything needed in one pass:</p>
+    <p><a href="suggest.html">Suggest a listing →</a> &nbsp;·&nbsp; <a href="update.html">Update an existing listing →</a></p>
+  </div>
+
+  <div class="card">
+    <div id="errors" class="errors" role="alert" aria-live="assertive"></div>
+
+    <form id="contactForm"
+          name="contact"
+          method="POST"
+          action="/thanks.html?sent=contact"
+          data-netlify="true"
+          data-netlify-honeypot="bot-field"
+          enctype="multipart/form-data"
+          novalidate>
+
+      <input type="hidden" name="form-name" value="contact">
+      <p class="hidden"><label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+
+      <div class="row">
+        <div class="field">
+          <label for="c-name">Your name<span class="req">*</span></label>
+          <input type="text" id="c-name" name="Name" autocomplete="name" required>
+        </div>
+        <div class="field">
+          <label for="c-email">Your email<span class="req">*</span></label>
+          <input type="email" id="c-email" name="Email" autocomplete="email" required>
+          <p class="hint">So we can write back.</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="c-topic">What's this about?<span class="req">*</span></label>
+        <select id="c-topic" name="Topic" required>
+          <option value="">Choose one…</option>
+          <option>A correction to something on the site</option>
+          <option>A question about the directory</option>
+          <option>Photos for a listing</option>
+          <option>Something about my parish, school, or ministry</option>
+          <option>Supporting or sponsoring the site</option>
+          <option>A problem with the website itself</option>
+          <option>Something else</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="c-message">Message<span class="req">*</span></label>
+        <textarea id="c-message" name="Message" rows="8" required
+                  placeholder="Tell us as much or as little as you like."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="c-attach">Attach a file<span class="opt">optional</span></label>
+        <input type="file" id="c-attach" name="Attachment" accept="image/*,.pdf">
+        <p class="hint">One photo or PDF, up to 5 MB. Got several? Email them instead — the address is below.</p>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Send message</button>
+        <span class="note">Goes straight to Ryan. Usually answered within a few days.</span>
+      </div>
+    </form>
+  </div>
+
+  <details class="plain">
+    <summary>Prefer plain email?</summary>
+    <div class="body">
+      <p>Write to <a id="mailLink" href="mailto:ryan@salesfamily.net">ryan@salesfamily.net</a> — attachments welcome, and nothing about this form is required. It reaches exactly the same place.</p>
+    </div>
+  </details>
+
+</div>
+
+<footer class="sitefooter">
+  <div class="inner">
+    <div>
+      <div class="name">Irving Catholic</div>
+      <p>A community-maintained directory of Catholic churches, schools, ministries, and businesses in the Irving area.</p>
+    </div>
+    <div>
+      <div class="h">Get involved</div>
+      <a class="l" href="suggest.html">Suggest a listing</a>
+      <a class="l" href="update.html">Update your information</a>
+      <a class="l" href="contact.html">Contact us</a>
+    </div>
+  </div>
+  <div class="base">
+    <span>© 2026 Ryan Sales</span>
+    <span>Made with care in Irving, Texas</span>
+  </div>
+</footer>
+
+<script src="./forms.js"></script>
+<script>
+(function () {
+  var IC = window.ICForms;
+  var form = document.getElementById('contactForm');
+  var box = document.getElementById('errors');
+
+  var name = document.getElementById('c-name');
+  var email = document.getElementById('c-email');
+  var topic = document.getElementById('c-topic');
+  var message = document.getElementById('c-message');
+  var attach = document.getElementById('c-attach');
+
+  // Keep the plain-email fallback carrying whatever has already been typed.
+  var mailLink = document.getElementById('mailLink');
+  function refreshMailto() {
+    mailLink.href = IC.mailtoFrom(
+      'ryan@salesfamily.net',
+      'Irving Catholic — ' + (topic.value || 'a message from the website'),
+      [IC.trim(message.value), '', '— ' + (IC.trim(name.value) || 'a visitor to irving-catholic.net')]
+    );
+  }
+  [name, topic, message].forEach(function (el) { el.addEventListener('input', refreshMailto); });
+  topic.addEventListener('change', refreshMailto);
+  refreshMailto();
+
+  form.addEventListener('submit', function (e) {
+    var errs = [];
+    if (!IC.trim(name.value)) errs.push({ text: 'Add your name so we know who we’re replying to.', el: name });
+    if (!IC.isEmail(email.value)) errs.push({ text: 'Add a working email address — that’s the only way to reply.', el: email });
+    if (!topic.value) errs.push({ text: 'Pick what the message is about.', el: topic });
+    if (IC.trim(message.value).length < 10) errs.push({ text: 'Write a little more in the message — at least a sentence.', el: message });
+
+    var f = attach.files && attach.files[0];
+    if (f && f.size > 5 * 1024 * 1024) {
+      errs.push({ text: '“' + f.name + '” is over 5 MB. Email it to ryan@salesfamily.net instead.', el: attach });
+    }
+
+    if (IC.showErrors(box, errs)) e.preventDefault();
+  });
+})();
+</script>
+</body>
+</html>

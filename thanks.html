@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thank you — Irving Catholic</title>
+<meta name="description" content="Thank you — your message has reached the Irving Catholic directory.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./forms.css">
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← Back to the map</a>
+  <a class="wordmark" href="index.html">
+    <span class="mark">✦</span>
+    <span class="name">Irving Catholic</span>
+  </a>
+</div>
+
+<div class="wrap">
+
+  <div class="pagehead" style="padding-bottom:16px">
+    <div class="eyebrow solo">Received</div>
+    <h1 class="display" id="head">Thank you — it came through</h1>
+    <p class="lede" id="lede">Your message is in the inbox and a person will read it. If it needs an answer, you'll hear back at the email address you gave, usually within a few days.</p>
+  </div>
+
+  <div class="card">
+    <h3 class="sub">What happens next</h3>
+    <p class="section-note" id="next" style="margin-bottom:0">Nothing on this site publishes automatically. Every submission is read, checked, and added by hand — which is slower, but it's why the directory stays accurate.</p>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-primary" href="index.html">Back to the map</a>
+    <a class="btn btn-ghost" href="suggest.html">Suggest another listing</a>
+  </div>
+
+</div>
+
+<footer class="sitefooter" style="margin-top:70px">
+  <div class="inner">
+    <div>
+      <div class="name">Irving Catholic</div>
+      <p>A community-maintained directory of Catholic churches, schools, ministries, and businesses in the Irving area.</p>
+    </div>
+    <div>
+      <div class="h">Get involved</div>
+      <a class="l" href="suggest.html">Suggest a listing</a>
+      <a class="l" href="update.html">Update your information</a>
+      <a class="l" href="contact.html">Contact us</a>
+    </div>
+  </div>
+  <div class="base">
+    <span>© 2026 Ryan Sales</span>
+    <span>Made with care in Irving, Texas</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var COPY = {
+    suggest: {
+      head: 'Thank you — the listing is in',
+      lede: 'It has landed in the inbox with everything you sent. Nothing goes live automatically: a person reads each suggestion, checks the details, and adds it to the map — usually within a week or two.',
+      next: 'If anything is unclear, or we need a photo or a phone number you didn’t have to hand, we’ll write to the email address you gave. Otherwise the next you’ll see of it is a new pin on the map.'
+    },
+    update: {
+      head: 'Thank you — the correction is in',
+      lede: 'The change is in the inbox alongside a note of exactly what you edited, so it’s quick to check and apply.',
+      next: 'Corrections coming from the parish, school, or business itself are trusted and applied quickly. Anything we can’t verify, we’ll ask you about first.'
+    },
+    contact: {
+      head: 'Thank you — message sent',
+      lede: 'It’s in the inbox and will be read by a person. If it needs an answer, you’ll hear back at the address you gave, usually within a few days.',
+      next: 'Irving Catholic is kept up by one person in his spare time, so replies aren’t instant — but every message does get read.'
+    }
+  };
+
+  var sent = '';
+  try { sent = new URLSearchParams(window.location.search).get('sent') || ''; } catch (e) {}
+  var copy = COPY[sent];
+  if (!copy) return;
+
+  document.getElementById('head').textContent = copy.head;
+  document.getElementById('lede').textContent = copy.lede;
+  document.getElementById('next').textContent = copy.next;
+  document.title = copy.head + ' — Irving Catholic';
+})();
+</script>
+</body>
+</html>
