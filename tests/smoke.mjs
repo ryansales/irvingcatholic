@@ -6,56 +6,11 @@
 
    Run: cd tests && npm install && npm test
 */
-import { createServer } from 'node:http';
-import { readFile, stat } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
-import { join, extname, normalize, dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright';
-import { loadDirectory, repoRoot } from '../scripts/lib/load-directory.mjs';
+import { readFile } from 'node:fs/promises';
+import { loadDirectory } from '../scripts/lib/load-directory.mjs';
+import { serveSite, launchSite, throttle, mapIdle, checkCdnVersions, cpuThrottle } from './lib/site-harness.mjs';
 
-const here = dirname(fileURLToPath(import.meta.url));
-
-/* The pages pull React, Leaflet, and marker clustering from unpkg at runtime.
-   The test serves the same versions from node_modules instead, so a CDN
-   hiccup can never turn into a red build. Keep these versions in step with
-   the URLs in the HTML and in support.js — an unmapped unpkg URL fails the
-   test on purpose, so a new runtime dependency has to be a deliberate choice.
-   Whether unpkg itself is up is a separate, scheduled check. */
-const CDN_MAP = {
-  'https://unpkg.com/react@18.3.1/umd/react.production.min.js': 'react/umd/react.production.min.js',
-  'https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js': 'react-dom/umd/react-dom.production.min.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js': 'leaflet/dist/leaflet.js',
-  'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css': 'leaflet/dist/leaflet.css',
-  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js': 'leaflet.markercluster/dist/leaflet.markercluster.js',
-  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css': 'leaflet.markercluster/dist/MarkerCluster.css',
-  'https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css': 'leaflet.markercluster/dist/MarkerCluster.Default.css',
-};
-
-const TYPES = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.jpg': 'image/jpeg',
-  '.png': 'image/png',
-  '.txt': 'text/plain; charset=utf-8',
-};
-
-/* Serve the repo the way Netlify does: publish ".", no build, no rewrites. */
-const server = createServer(async (req, res) => {
-  const path = decodeURIComponent(req.url.split('?')[0]);
-  const file = join(repoRoot, normalize(path === '/' ? '/index.html' : path).replace(/^(\.\.[/\\])+/, ''));
-  try {
-    if (!(await stat(file)).isFile()) throw new Error('not a file');
-    res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' });
-    res.end(await readFile(file));
-  } catch {
-    res.writeHead(404, { 'content-type': 'text/plain' });
-    res.end('not found');
-  }
-});
-await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-const base = `http://127.0.0.1:${server.address().port}`;
+const { server, base } = await serveSite();
 
 const dir = loadDirectory();
 const physical = dir.resources.filter((r) => !r.online);
@@ -70,98 +25,18 @@ const check = (name, condition, detail = '') => {
   }
 };
 
-/* If a dependency bump moves node_modules ahead of the versions the site
-   actually requests, the stand-in would quietly test the wrong code. */
-for (const [url, local] of Object.entries(CDN_MAP)) {
-  const wanted = url.match(/@(\d+\.\d+\.\d+)\//)?.[1];
-  const pkg = local.split('/')[0];
-  const installed = JSON.parse(await readFile(join(here, 'node_modules', pkg, 'package.json'), 'utf8')).version;
-  check(
-    `${pkg} in node_modules matches the ${wanted} the site loads`,
-    installed === wanted,
-    `installed ${installed} — update the unpkg URLs in the HTML and CDN_MAP together`,
-  );
-}
+await checkCdnVersions(check);
 
-const browser = await chromium.launch();
-const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
-
-/* A shared CI runner is several times slower than a laptop, and this site has
-   timing-sensitive map code. SMOKE_CPU_THROTTLE=4 reproduces that locally. */
-const cpuThrottle = Number(process.env.SMOKE_CPU_THROTTLE || 1);
-
-/* OpenStreetMap asks that its tile servers not be used by automation, and a
-   missing tile says nothing about whether our code works. */
-await context.route('**://*.tile.openstreetmap.org/**', (route) => route.abort());
-await context.route('**://fonts.googleapis.com/**', (route) => route.fulfill({ status: 200, contentType: 'text/css', body: '' }));
-await context.route('**://fonts.gstatic.com/**', (route) => route.abort());
-
-const unmappedCdn = [];
-await context.route('**://unpkg.com/**', async (route) => {
-  const url = route.request().url();
-  const local = CDN_MAP[url];
-  if (!local) {
-    unmappedCdn.push(url);
-    return route.abort();
-  }
-  const file = join(here, 'node_modules', local);
-  if (!existsSync(file)) {
-    unmappedCdn.push(`${url} (expected ${local} in node_modules)`);
-    return route.abort();
-  }
-  return route.fulfill({
-    status: 200,
-    contentType: file.endsWith('.css') ? 'text/css' : 'text/javascript',
-    body: await readFile(file),
-  });
-});
+const { browser, context, unmappedCdn } = await launchSite();
 
 const pageErrors = [];
-context.on('page', (page) => {
-  page.on('pageerror', (err) => pageErrors.push(`${page.url()}: ${err.message}`));
+context.on('page', (p) => {
+  p.on('pageerror', (err) => pageErrors.push(`${p.url()}: ${err.message}`));
 });
 
 const page = await context.newPage();
-if (cpuThrottle > 1) {
-  const cdp = await context.newCDPSession(page);
-  await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottle });
-  console.log(`(CPU throttled ${cpuThrottle}x)`);
-}
-
-/* buildMap() schedules an invalidateSize + fitBounds 250ms after the map
-   appears, and fitBounds animates. Anything that changes the query while that
-   is running tears the map out from under Leaflet — see issue #4. Rather than
-   guess how long that takes on a given machine, wait for the map container to
-   go quiet and stay quiet. */
-const mapIdle = async () => {
-  await page
-    .waitForFunction(() => !!document.querySelector('#homeMapHost .leaflet-container'), null, {
-      timeout: 20000,
-    })
-    .catch(() => {});
-  await page.evaluate(() => {
-    window.__mapQuietSince = 0;
-  });
-  await page
-    .waitForFunction(
-      () => {
-        const el = document.querySelector('#homeMapHost .leaflet-container');
-        if (!el) return false;
-        if (el.classList.contains('leaflet-zoom-anim')) {
-          window.__mapQuietSince = 0;
-          return false;
-        }
-        if (!window.__mapQuietSince) {
-          window.__mapQuietSince = Date.now();
-          return false;
-        }
-        return Date.now() - window.__mapQuietSince > 800;
-      },
-      null,
-      { timeout: 20000, polling: 100 },
-    )
-    .catch(() => {});
-};
+await throttle(context, page);
+if (cpuThrottle > 1) console.log(`(CPU throttled ${cpuThrottle}x)`);
 
 /* seo.js rewrites the head at load time, so the tags that matter are the
    rendered ones — reading the file would only show the fallbacks. */
@@ -264,7 +139,7 @@ if (hasSearch) {
      this test is not the right place to exercise. See issue #4. */
   const settle = async () => {
     await page.waitForTimeout(200); // clear the 120ms debounce so the rebuild has started
-    await mapIdle();
+    await mapIdle(page);
   };
   await settle(); // the map is still settling from first paint
   const words = (s) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
