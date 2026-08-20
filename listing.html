@@ -1,14 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Irving Catholic</title>
-<meta name="description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
-<link rel="canonical" href="https://irving-catholic.net/">
-<meta property="og:title" content="Irving Catholic">
-<meta property="og:description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
+<!-- Title, description, canonical, social tags and JSON-LD are set per listing
+     by seo.js from the ?id= in the URL. The values below are only the fallback
+     shown for an unknown or missing id. -->
+<title>Irving Catholic Directory — Irving, TX</title>
+<meta name="description" content="Parishes, schools, seminaries, ministries, and Catholic-owned businesses in Irving, Texas.">
+<meta name="theme-color" content="#bf4a3c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
+<script src="./directory-data.js"></script>
+<script src="./seo.js"></script>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -24,6 +28,18 @@
     body{margin:0}
     .leaflet-container{font-family:'Hanken Grotesk',sans-serif;background:#e8e3d8}
     .cd-pin{background:none;border:none}
+    /* Mobile layout — see the matching block in index.html. */
+    @media (max-width:820px){
+      .ic-detailgrid{grid-template-columns:1fr!important;gap:28px!important}
+      .ic-footgrid{grid-template-columns:1fr!important;gap:28px!important}
+    }
+    @media (max-width:640px){
+      .ic-pad{padding-left:18px!important;padding-right:18px!important}
+      .ic-hero{height:250px!important}
+      .ic-hero h1{font-size:30px!important}
+      .ic-gallery{grid-template-columns:1fr 1fr!important}
+      .ic-editstrip{align-items:flex-start!important}
+    }
   </style>
 </helmet>
 <div style="min-height:100vh;background:#f6f1e8;font-family:'Hanken Grotesk',sans-serif;color:#2b2620">
@@ -37,10 +53,10 @@
     </div>
   </div>
 
-  <div style="max-width:1040px;margin:0 auto;padding:0 28px 80px">
+  <div class="ic-pad" style="max-width:1040px;margin:0 auto;padding:0 28px 80px">
 
     <!-- hero -->
-    <div style="position:relative;margin-top:24px;height:340px;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:flex-end;{{ heroBg }}">
+    <div class="ic-hero" style="position:relative;margin-top:24px;height:340px;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:flex-end;{{ heroBg }}">
       <sc-if value="{{ needsPhoto }}" hint-placeholder-val="{{ true }}">
         <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
           <span style="font-family:'Newsreader',serif;font-size:210px;line-height:1;color:rgba(255,255,255,.13)">✦</span>
@@ -59,7 +75,7 @@
     </div>
 
     <!-- body grid -->
-    <div style="display:grid;grid-template-columns:1fr 320px;gap:40px;margin-top:40px;align-items:start">
+    <div class="ic-detailgrid" style="display:grid;grid-template-columns:1fr 320px;gap:40px;margin-top:40px;align-items:start">
 
       <!-- main column -->
       <div>
@@ -80,7 +96,7 @@
         </sc-if>
 
         <h3 style="font-family:'Newsreader',serif;font-size:19px;font-weight:600;margin:0 0 14px">Gallery</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px">
+        <div class="ic-gallery" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px">
           <sc-for list="{{ galleryTiles }}" as="g" hint-placeholder-count="3">
             <div style="{{ g.style }}">
               <sc-if value="{{ g.fallback }}" hint-placeholder-val="{{ true }}">
@@ -154,7 +170,7 @@
     </div>
 
       <!-- keep this listing accurate -->
-      <div style="margin-top:54px;padding-top:30px;border-top:1px solid #e7e0d2;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <div class="ic-editstrip" style="margin-top:54px;padding-top:30px;border-top:1px solid #e7e0d2;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
         <div style="max-width:470px">
           <div style="font-family:'Newsreader',serif;font-size:20px;font-weight:600;color:#2b2620;margin-bottom:5px">Is anything here out of date?</div>
           <div style="font-size:14px;line-height:1.6;color:#6b6356">Mass times shift and offices move. If something is wrong — or you have photos of this place — send a correction and it gets fixed.</div>
@@ -168,7 +184,7 @@
 
   <!-- footer -->
   <footer style="background:#efe8da;border-top:1px solid #e2d9c8">
-    <div style="max-width:1040px;margin:0 auto;padding:44px 28px 26px;display:grid;grid-template-columns:1.5fr 1fr;gap:40px">
+    <div class="ic-footgrid ic-pad" style="max-width:1040px;margin:0 auto;padding:44px 28px 26px;display:grid;grid-template-columns:1.5fr 1fr;gap:40px">
       <div>
         <div style="font-family:'Newsreader',serif;font-size:17px;color:#2b2620;margin-bottom:14px">Irving Catholic</div>
         <p style="font-size:13.5px;line-height:1.6;color:#8a8073;margin:0;max-width:320px">A community-maintained directory of Catholic churches, schools, ministries, and businesses in the Irving area.</p>
@@ -180,7 +196,7 @@
         <a href="contact.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Contact us</a>
       </div>
     </div>
-    <div style="max-width:1040px;margin:0 auto;padding:20px 28px 40px;border-top:1px solid #e2d9c8;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+    <div class="ic-pad" style="max-width:1040px;margin:0 auto;padding:20px 28px 40px;border-top:1px solid #e2d9c8;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
       <span style="font-size:12px;color:#a99a83">&copy; 2026 Ryan Sales</span>
       <span style="font-size:12px;color:#a99a83">Made with care in Irving, Texas</span>
     </div>
