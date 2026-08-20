@@ -44,6 +44,16 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `netlify.toml` | `publish = "."`, a 301 from `www` to the bare domain, `X-Robots-Tag: noindex` on the design-source files and README, and a long cache on `/images/*` |
 | `robots.txt` | Allows all except the design-source files, README, and `/tools/`; points at `sitemap.xml` |
 
+**Script tags belong in `<head>`, never inside `<helmet>`.** support.js copies
+`<helmet>` children into the head, but the browser has already run any
+`<script src>` there while parsing the body — so it executes twice. The second
+run of `leaflet.js` replaces `window.L` with a fresh Leaflet and the
+markercluster plugin attached to the old one vanishes, which throws and silently
+stops the map filtering (issue #4). `scripts/check-static.mjs` fails the build if
+a script reappears inside `<helmet>` on either deployed page. The `.dc.html`
+design sources still carry the old arrangement and are flagged as a warning:
+they are reference only, but regenerating a page from one would reintroduce this.
+
 The design-source versions of the two pages are `Home.dc.html` and `Resource Detail.dc.html`
 (included in this bundle for reference). `index.html` / `listing.html` are those files with the
 detail-page URL changed from `Resource%20Detail.dc.html?id=` to `listing.html?id=` and real
@@ -119,10 +129,16 @@ so the checks do it. They run on every pull request and every push to `main` (`.
 and they need no dependencies beyond Node 22 except for the browser test.
 
 ```sh
-node scripts/validate-data.mjs     # directory-data.js is sane
-node scripts/check-static.mjs      # pages, local references, hosting config
-cd tests && npm install && npm test  # renders the real pages in Chromium
+node scripts/validate-data.mjs        # directory-data.js is sane
+node scripts/check-static.mjs         # pages, local references, hosting config
+cd tests && npm install
+npm test                              # renders the real pages in Chromium
+npm run test:map                      # the map, with the CPU throttled
 ```
+
+`SMOKE_CPU_THROTTLE=4 npm test` slows the browser to roughly a shared CI runner.
+Worth using on anything that touches the map: issue #4 was invisible at full
+laptop speed and failed reliably at 4x.
 
 | Check | What it protects |
 | --- | --- |
@@ -130,6 +146,7 @@ cd tests && npm install && npm test  # renders the real pages in Chromium
 | `scripts/validate-data.mjs` | Duplicate slugs, unknown categories, missing fields, `https://` creeping into `website`, photo paths that do not exist, coordinates outside Irving, online listings carrying map pins |
 | `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `.`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
 | `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears and is reachable by a plain link, search filters/clears and `?q=` reopens it, map pins and the boundary draw, detail pages show name/address/phone/Mass times, each carries its own title/canonical/OG tags and parseable JSON-LD, placeholders and unknown `?id=` are `noindex`, no uncaught errors |
+| `tests/map-race.mjs` | Issue #4: changing the filter while the map is animating. Runs with the CPU throttled, because none of it reproduces at laptop speed |
 | `.github/workflows/link-check.yml` | Weekly: every listing website and CDN asset still resolves. Files one issue, updates it in place, closes it when clean. Deliberately not on pull requests — a parish's host having a bad morning should not block a merge |
 
 The smoke test serves React, ReactDOM, and Leaflet from `tests/node_modules` instead of unpkg, so
