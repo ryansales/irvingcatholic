@@ -60,9 +60,19 @@ All ten go in the main map area with category `owned`. `lat`/`lng` still to be f
 Both website-published addresses were re-confirmed: Baker Tree Service lists 526 Campana Ct (with
 `bts2005@verizon.net`) and EFI lists 1605 W Seventh St on their own sites.
 
-Rows 5 and 8 share 511 E John W Carpenter Fwy, Ste 500 — the same building as Beatitudes and the
-SVdP office already in `directory-data.js`, which sit at **32.884692, -96.949608**. Those two can
-reuse that coordinate directly.
+Rows 5 and 8 share 511 E John W Carpenter Fwy, Ste 500 with Beatitudes and the SVdP office already
+in `directory-data.js`. All four now sit at **32.860489, -96.934850**, confirmed against Google Maps.
+
+That took a correction. The Census geocoder returned two points 263 m apart for the one building,
+because the two rows spell the street differently — "John W Carpenter" against "John Carpenter" —
+and a street-centreline geocoder follows the spelling. Separately, the coordinate the site already
+carried for Beatitudes and SVdP, `32.884692, -96.949608`, was one of the approximate placeholders
+the README warns about: it sits **3 km** from the real building. Both existing listings have been
+moved to the confirmed coordinate.
+
+Two rows in `list-1-physical-irving.csv` now read `manual` in the `Geocoder` column. That is a
+convention `geocode.py` respects: a `manual` row is never re-geocoded, and its coordinate is what
+every other row at the same address gets. Hand-checked pins survive a re-run.
 
 ### Geocoding
 
@@ -104,11 +114,18 @@ correctly rejected. If an address misses or lands outside the boundary, whatever
 pushed and the run summary warns, naming what to look at. The results are also attached to the run as
 a `geocode-results` artifact, so a rejected push can never lose them again.
 
-The script itself is `review/geocode.py` if you ever do want to run it directly. It has been tested
-end to end against mocked geocoder responses — census answers everything, census misses and Nominatim
-answers, census unreachable and Nominatim answers, an out-of-boundary result, and both geocoders
-unreachable — and the branch-and-push step was rehearsed against a local clone, including a re-run
-overwriting its own branch.
+The script itself is `review/geocode.py` if you ever do want to run it directly, and
+`review/test_geocode.py` covers it — 26 assertions, no network needed:
+
+```
+python3 review/test_geocode.py
+```
+
+It exercises the failures this project actually hit: two spellings of one address drifting apart, a
+hand-placed coordinate being overwritten by a re-run, a failed run blanking coordinates it already
+had, plus the geocoder fallback chain and the boundary flag. The branch-and-push half of the
+workflow was rehearsed separately against a local clone, including a re-run overwriting its own
+branch.
 
 Address-level sanity in the meantime: all ten sit in core Irving ZIPs — 75039, 75060, 75061, 75062 —
 none in the ambiguous Coppell and Dallas fringes of 75063 or 75038.
@@ -250,10 +267,9 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 
 ## What's left before List 1 goes live
 
-1. Run the **Geocode List 1 addresses** workflow from the Actions tab, merge the pull request it
-   links from the run summary, then paste `review/list-1-geocoded.js` into `resources` in
-   `directory-data.js`. Rows 5 and 8 can reuse
-   32.884692, -96.949608 if you would rather not wait on the geocoder for those two.
+1. Paste `review/list-1-geocoded.js` into `resources` in `directory-data.js` — the coordinates are
+   done. (Re-run the **Geocode List 1 addresses** workflow from the Actions tab only if an address
+   changes; it leaves the two `manual` rows alone.)
 2. Write a one-line `blurb` and a short `description` for each. The ICON comments are good raw
    material and several are directly quotable.
 3. Confirm each business wants to be listed — especially the four medical practices, which did not
@@ -270,6 +286,7 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 | `list-2a-online-named-businesses.csv` | The 21 named no-storefront businesses — the working set |
 | `list-2b-online-individuals-held.csv` | The 24 individuals, parked for now |
 | `geocode.py` | Geocodes List 1 and boundary-checks every result |
+| `test_geocode.py` | 26 assertions covering `geocode.py`, no network needed |
 | `list-1-geocoded.js` | Paste-ready listing objects — created by the first workflow run |
 | `../.github/workflows/geocode.yml` | Runs the geocoder from the GitHub Actions tab |
 | `ICON-source.csv` | The original sheet, unmodified |
