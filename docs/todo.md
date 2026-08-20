@@ -121,6 +121,28 @@ before launch. They are now published as `geo` in structured data, so an error i
 more consequential than it was — it can put a parish on the wrong block in
 results that consume the markup.
 
+### 5b. Verify three details on the ICON listings
+**Impact: medium. Effort: low.** Each needs one phone call or one reply.
+
+These came out of the ICON list research. Each is a real, unresolved conflict in
+the public record, so nothing was guessed — the listings avoid the disputed
+detail rather than assert it.
+
+- **Texas Mercy Clinic — which address?** Texas Mercy Headache and Pain is listed
+  at 4950 N O'Connor Ste 203, which is what the ICON sheet gives and what the map
+  pin uses. Texas Mercy Medical Clinic is listed at 4925 N O'Connor Ste 105-A,
+  across the street, on a record verified as recently as July 2026. Both name
+  Dr. Lance Hoover. Confirm which door patients use and correct the pin if needed.
+
+- **Klassen Plumbing — which address?** Three are in circulation under the one
+  phone number, `(972) 259-9600`: 118 S Main St (the pin), 125 S Jefferson St,
+  and 716 Knight Ln. Confirm the working address; if it is a residence rather
+  than a shop, the listing belongs in the no-storefront section instead.
+
+- **Neuro Integration Services — Eileen Kainer or Eileen King?** The ICON sheet
+  says Kainer. The practice's own pages and two directories say "Eileen King,
+  RN, BSN". The description names no practitioner until this is settled.
+
 ### 6. Performance / Core Web Vitals
 **Impact: medium. Effort: low.**
 

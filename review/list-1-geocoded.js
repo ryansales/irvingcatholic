@@ -34,22 +34,6 @@
   "gallery": []
 },
 {
-  "id": "ohlenforst-ward-orthodontics",
-  "name": "Ohlenforst & Ward Orthodontics",
-  "category": "owned",
-  "address": "3200 N O'Connor Rd, Irving, TX 75062",
-  "lat": 32.84781,
-  "lng": -96.950309,
-  "blurb": "TODO one line for the card and map popup",
-  "description": "TODO paragraph for the detail page",
-  "phone": "(972) 257-3200",
-  "website": "irvingorthodontist.com",
-  "hours": "",
-  "heroPhoto": null,
-  "photoCredit": null,
-  "gallery": []
-},
-{
   "id": "dallas-pelvic-health",
   "name": "Dallas Pelvic Health",
   "category": "owned",

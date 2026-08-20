@@ -13,16 +13,16 @@ no-storefront section is effectively empty too.
 
 | Bucket | Count |
 |---|---|
-| Brick & mortar in Irving — map pins | 10 |
-| No storefront — named businesses (working set) | 21 |
+| Brick & mortar in Irving — map pins | 9 |
+| No storefront — named businesses | 21 |
 | No storefront — individuals (held) | 24 |
 | Discarded (outside Irving) | 14 |
-| Removed | 5 |
+| Removed | 6 |
 | **Total distinct businesses** | **74** |
 
 Decisions applied in this revision:
 
-- All ten map listings are categorized `owned` (Catholic Owned) rather than `business` — none of them
+- All nine map listings are categorized `owned` (Catholic Owned) rather than `business` — none of them
   sell a Catholic product.
 - **VDP Partners** and **Sullivan Chimney Sweep** moved to the no-storefront list with their addresses
   withheld; they run out of a residence.
@@ -39,28 +39,27 @@ Care), and Joe Morris, Enrique Man, Bebe Bloch, and Laurie DePauw each appear 2�
 
 ---
 
-## List 1 — Brick & mortar inside Irving city limits (10)
+## List 1 — Brick & mortar inside Irving city limits (9)
 
-All ten go in the main map area with category `owned`. `lat`/`lng` still to be filled in — see
-**Geocoding** below.
+All nine are live in `directory-data.js` with category `owned`, coordinates confirmed, and a blurb
+and description written from sourced material.
 
 | # | Business | Trade | Address | Phone |
 |---|---|---|---|---|
 | 1 | **Texas Mercy Clinic** (Dr. Lance Hoover, MD) | Catholic doctor; pain & headache, primary care, urgent care | 4950 N O'Connor Rd, Ste 203, Irving, TX 75062 | (469) 984-0311 |
 | 2 | **Dr. Neville Fernandes, MD** | Gastroenterology (Texas Digestive Disease Consultants) | 6750 N MacArthur Blvd, Ste 207, Irving, TX 75039 | (972) 637-8480 |
-| 3 | **Ohlenforst & Ward Orthodontics** | Orthodontist | 3200 N O'Connor Rd, Irving, TX 75062 | (972) 257-3200 |
-| 4 | **Dallas Pelvic Health** (Dr. Chelsea Harkins, PT, DPT) | Pelvic floor physical therapy | 114 E John Carpenter Fwy, Ste 130, Irving, TX 75062 | (469) 476-0915 |
-| 5 | **Neuro Integration Services** (Eileen Kainer) | NIS therapy | 511 E John W Carpenter Fwy, Ste 500, Irving, TX 75062 | (361) 648-7767 |
-| 6 | **James Sears Massage** | Massage therapy | 105 W 2nd St, Irving, TX 75060 | (214) 907-5009 |
-| 7 | **John Klassen Co.** (Klassen Plumbing) | Plumber | 118 S Main St, Irving, TX 75060 | (972) 259-9600 |
-| 8 | **Rohter & Company** (Inez Hannegan) | Real estate brokerage | 511 E John Carpenter Fwy, Ste 500, Irving, TX 75062 | (972) 214-8756 |
-| 9 | **Baker Tree Service** (James Baker) | Tree trimming & stump grinding | 526 Campana Ct, Irving, TX 75061 | (972) 986-7791 |
-| 10 | **EFI — Environmentally Focused Irrigation** (Eddie Herrera) | Sprinkler repair & installation | 1605 W Seventh St, Irving, TX 75060 | (918) 517-5028 |
+| 3 | **Dallas Pelvic Health** (Dr. Chelsea Harkins, PT, DPT) | Pelvic floor physical therapy | 114 E John Carpenter Fwy, Ste 130, Irving, TX 75062 | (469) 476-0915 |
+| 4 | **Neuro Integration Services** (Eileen Kainer) | NIS therapy | 511 E John W Carpenter Fwy, Ste 500, Irving, TX 75062 | (361) 648-7767 |
+| 5 | **James Sears Massage** | Massage therapy | 105 W 2nd St, Irving, TX 75060 | (214) 907-5009 |
+| 6 | **John Klassen Co.** (Klassen Plumbing) | Plumber | 118 S Main St, Irving, TX 75060 | (972) 259-9600 |
+| 7 | **Rohter & Company** (Inez Hannegan) | Real estate brokerage | 511 E John Carpenter Fwy, Ste 500, Irving, TX 75062 | (972) 214-8756 |
+| 8 | **Baker Tree Service** (James Baker) | Tree trimming & stump grinding | 526 Campana Ct, Irving, TX 75061 | (972) 986-7791 |
+| 9 | **EFI — Environmentally Focused Irrigation** (Eddie Herrera) | Sprinkler repair & installation | 1605 W Seventh St, Irving, TX 75060 | (918) 517-5028 |
 
 Both website-published addresses were re-confirmed: Baker Tree Service lists 526 Campana Ct (with
 `bts2005@verizon.net`) and EFI lists 1605 W Seventh St on their own sites.
 
-Rows 5 and 8 share 511 E John W Carpenter Fwy, Ste 500 with Beatitudes and the SVdP office already
+Rows 4 and 7 share 511 E John W Carpenter Fwy, Ste 500 with Beatitudes and the SVdP office already
 in `directory-data.js`. All four now sit at **32.860489, -96.934850**, confirmed against Google Maps.
 
 That took a correction. The Census geocoder returned two points 263 m apart for the one building,
@@ -232,10 +231,11 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 
 ---
 
-## Removed (5)
+## Removed (6)
 
 | Business | Why |
 |---|---|
+| Ward Orthodontics (Dr. Ohlenforst) | Dropped on review. Dr. Ohlenforst, the dentist the ICON sheet recommends, has retired; the practice continues under Dr. Nick Ward. |
 | A Guaranteed Home Appliance (Bill Kurtz) | Google lists the business as permanently closed. |
 | Lorraine Marie Photography | Held bucket cleared. |
 | Hope Sipe Photography | Held bucket cleared. |
@@ -265,16 +265,47 @@ Six entries could have gone either way. Flagging them so you can flip any of the
 
 ---
 
-## What's left before List 1 goes live
+## The copy pass
 
-1. Paste `review/list-1-geocoded.js` into `resources` in `directory-data.js` — the coordinates are
-   done. (Re-run the **Geocode List 1 addresses** workflow from the Actions tab only if an address
-   changes; it leaves the two `manual` rows alone.)
-2. Write a one-line `blurb` and a short `description` for each. The ICON comments are good raw
-   material and several are directly quotable.
-3. Confirm each business wants to be listed — especially the four medical practices, which did not
-   submit themselves.
-4. Replace the three `EXAMPLE ONLINE LISTING` placeholders as the first real no-storefront entries land.
+Every listing in Lists 1 and 2A is now live in `directory-data.js` with a `blurb` and a
+`description`, written from each business's own site, its chamber and directory records, and its
+social pages. Nothing is invented. Where a fact could not be sourced it was left out, and optional
+fields were left blank rather than guessed — most listings carry no `hours`, and Klassen Plumbing has
+no `website` because none was found.
+
+The three `EXAMPLE ONLINE LISTING` placeholders are gone, replaced by the 21 real no-storefront
+businesses. `directory-data.js` now holds **54 listings**: the original 24 real ones, 9 map pins from
+List 1, and 21 online listings from List 2A.
+
+Two descriptions are deliberately careful. **Neuro Integration Services** explains NIS as what its
+practitioners do rather than asserting that it works — a public directory should not carry clinical
+claims on a listing's behalf. And **Rohter & Company's** awards are attributed as local *Best of*
+awards, which is what the sources support rather than the stronger phrasing on the firm's own site.
+
+### Open questions
+
+Three from List 1 are now written up in `todo.md` under *5b. Verify three details on the ICON
+listings*, each needing one phone call: the Texas Mercy address (4950 vs 4925 N O'Connor), the
+Klassen Plumbing address (three in circulation under one phone number), and whether the Neuro
+Integration Services practitioner is Eileen Kainer or Eileen King. Each listing avoids the disputed
+detail rather than guessing at it.
+
+Two smaller ones from List 2A, worth a member's confirmation rather than a call:
+
+- **Angelico Design Co.** gives its shop location as Dallas rather than Irving. It stayed in because
+  it is member-owned and online-only, so no address is published either way.
+- **Studio Ars Angeli** has no web presence beyond the link on the ICON sheet, and that sheet notes
+  availability only "until late July". The description says to confirm current openings.
+
+## What's left
+
+1. ~~Paste the listings into `directory-data.js`~~ — done, with coordinates and copy.
+2. ~~Write a `blurb` and a `description` for each~~ — done; see the copy pass above.
+3. ~~Replace the three `EXAMPLE ONLINE LISTING` placeholders~~ — done; the 21 real no-storefront
+   businesses replace them.
+4. Work through `todo.md` item 5b — three details needing one phone call each.
+5. Confirm the businesses want to be listed. **Nothing here was submitted by the business itself**,
+   and that matters most for the three medical practices.
 
 ## Files
 
