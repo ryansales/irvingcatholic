@@ -72,3 +72,10 @@ jobs:
       - name: Render the pages and check what came out
         run: npm test
         working-directory: tests
+
+      # Issue #4 only reproduced on a slow machine, so this one runs the map
+      # with the CPU throttled. It is separate from the smoke test because it
+      # is deliberately slow.
+      - name: Filter the map while it is busy
+        run: npm run test:map
+        working-directory: tests
