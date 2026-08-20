@@ -3,3 +3,7 @@ node_modules/
 
 # Written by image-slot.js while dragging images in during design work.
 .image-slots.state.json
+
+# Python bytecode from review/geocode.py
+__pycache__/
+*.pyc
