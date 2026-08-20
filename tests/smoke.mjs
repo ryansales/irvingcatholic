@@ -214,12 +214,24 @@ for (const cat of Object.values(dir.categories)) {
 /* Search drives the map, the sidebar, and the online section at once, so it is
    worth exercising rather than just asserting the box exists. */
 if (hasSearch) {
+  /* Changing the query tears the Leaflet map down and rebuilds it: 120ms of
+     debounce, then ~250ms of invalidateSize/fitBounds. Let that finish between
+     steps — typing the next query into a half-rebuilt map is a race, and one
+     this test is not the right place to exercise. See issue #4. */
+  const settle = async () => {
+    await page.waitForTimeout(200); // clear the debounce so the teardown has started
+    await page
+      .waitForFunction(() => !!document.querySelector('#homeMapHost .leaflet-container'), null, { timeout: 15000 })
+      .catch(() => {});
+    await page.waitForTimeout(500); // the post-build invalidateSize / fitBounds tick
+  };
   const words = (s) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
   const subject = physical[0];
   const unrelated = physical.find(
     (r) => r !== subject && ![...words(r.name)].some((w) => words(subject.name).has(w)),
   );
   await search.fill(subject.name);
+  await settle();
   await page.waitForFunction((name) => document.body.textContent.includes(name), unrelated.name, {
     timeout: 5000,
   }).then(() => {}, () => {});
@@ -228,12 +240,14 @@ if (hasSearch) {
   check(`searching "${subject.name}" drops "${unrelated.name}"`, !searched.includes(unrelated.name));
 
   await search.fill('zzzznothingmatchesthis');
+  await settle();
   await page.waitForFunction(() => /no listings match/i.test(document.body.textContent), null, {
     timeout: 5000,
   }).then(() => {}, () => {});
   check('a query with no results says so', /no listings match/i.test(await page.evaluate(() => document.body.textContent)));
 
   await search.fill('');
+  await settle();
   await page.waitForFunction((n) => document.body.textContent.includes(`${n} of ${n}`), physical.length, {
     timeout: 5000,
   }).then(() => {}, () => {});
