@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Irving Catholic</title>
+<meta name="description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
+<link rel="canonical" href="https://irving-catholic.net/">
+<meta property="og:title" content="Irving Catholic">
+<meta property="og:description" content="A directory of Catholic churches, schools, seminaries, ministries, and businesses in Irving, Texas.">
+<meta property="og:type" content="website">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="directory-data.js"></script>
+  <style>
+    body{margin:0}
+    .leaflet-container{font-family:'Hanken Grotesk',sans-serif;background:#e8e3d8}
+    .cd-pin{background:none;border:none}
+  </style>
+</helmet>
+<div style="min-height:100vh;background:#f6f1e8;font-family:'Hanken Grotesk',sans-serif;color:#2b2620">
+
+  <!-- top bar -->
+  <div style="position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:14px 28px;background:rgba(246,241,232,.9);backdrop-filter:blur(8px);border-bottom:1px solid #e7e0d2">
+    <a href="index.html" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;color:#7a6f5c;text-decoration:none">← Back to map</a>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div style="width:24px;height:24px;border-radius:6px;background:#bf4a3c;display:flex;align-items:center;justify-content:center;color:#fff;font-family:Newsreader,serif;font-size:14px">✦</div>
+      <span style="font-family:'Newsreader',serif;font-size:15px;font-weight:600">Irving Catholic</span>
+    </div>
+  </div>
+
+  <div style="max-width:1040px;margin:0 auto;padding:0 28px 80px">
+
+    <!-- hero -->
+    <div style="position:relative;margin-top:24px;height:340px;border-radius:18px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:flex-end;{{ heroBg }}">
+      <sc-if value="{{ needsPhoto }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none">
+          <span style="font-family:'Newsreader',serif;font-size:210px;line-height:1;color:rgba(255,255,255,.13)">✦</span>
+        </div>
+        <div style="position:absolute;top:16px;right:16px;display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:.04em;color:#fff;background:rgba(43,38,32,.34);border:1px solid rgba(255,255,255,.4);padding:5px 12px;border-radius:999px;backdrop-filter:blur(4px)">
+          <span style="width:6px;height:6px;border-radius:50%;background:#fff"></span>Photo coming soon
+        </div>
+      </sc-if>
+      <div style="position:relative;width:100%;padding:28px 32px;background:linear-gradient(to top,rgba(43,38,32,.8),rgba(43,38,32,0))">
+        <div style="display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:{{ color }};color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px">
+          <span style="width:8px;height:8px;border-radius:50%;background:#fff"></span>{{ catLabel }}
+        </div>
+        <h1 style="font-family:'Newsreader',serif;font-size:44px;font-weight:600;color:#fff;margin:0;line-height:1.04">{{ name }}</h1>
+        <div style="font-size:14.5px;color:rgba(255,255,255,.85);margin-top:8px">{{ heroSub }}</div>
+      </div>
+    </div>
+
+    <!-- body grid -->
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:40px;margin-top:40px;align-items:start">
+
+      <!-- main column -->
+      <div>
+        <h2 style="font-family:'Newsreader',serif;font-size:24px;font-weight:600;margin:0 0 14px;color:#2b2620">About</h2>
+        <p style="font-size:16px;line-height:1.7;color:#544d42;margin:0 0 22px">{{ description }}</p>
+
+        <sc-if value="{{ hasMass }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#fff;border:1px solid #ece6da;border-radius:16px;padding:22px 24px;margin-bottom:24px">
+            <h3 style="font-family:'Newsreader',serif;font-size:19px;font-weight:600;margin:0 0 14px;display:flex;align-items:center;gap:9px">
+              <span style="width:7px;height:20px;border-radius:3px;background:{{ color }};display:inline-block"></span>Mass &amp; Liturgy Times
+            </h3>
+            <sc-for list="{{ massList }}" as="t" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid #f3eee4;font-size:15px;color:#544d42">
+                <span style="width:6px;height:6px;border-radius:50%;background:{{ color }};flex:none"></span>{{ t }}
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <h3 style="font-family:'Newsreader',serif;font-size:19px;font-weight:600;margin:0 0 14px">Gallery</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:8px">
+          <sc-for list="{{ galleryTiles }}" as="g" hint-placeholder-count="3">
+            <div style="{{ g.style }}">
+              <sc-if value="{{ g.fallback }}" hint-placeholder-val="{{ true }}">
+                <span style="font-family:'Newsreader',serif;font-size:32px;line-height:1;color:{{ color }};opacity:.38">✦</span>
+                <span style="font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#b0a693;margin-top:7px">Photo coming soon</span>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- sidebar -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <sc-if value="{{ isPhysical }}" hint-placeholder-val="{{ true }}">
+        <div style="background:#fff;border:1px solid #ece6da;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+          <div id="detailMap" style="height:170px;width:100%"></div>
+          <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+            <div>
+              <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#a39780;margin-bottom:4px">Address</div>
+              <div style="font-size:14.5px;line-height:1.45;color:#544d42">{{ address }}</div>
+              <a href="{{ mapsHref }}" target="_blank" style="display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:{{ color }};text-decoration:none">Get directions →</a>
+            </div>
+            <div style="height:1px;background:#f0ebe1"></div>
+            <div>
+              <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#a39780;margin-bottom:4px">Hours</div>
+              <div style="font-size:14.5px;line-height:1.45;color:#544d42">{{ hours }}</div>
+            </div>
+            <div style="height:1px;background:#f0ebe1"></div>
+            <div>
+              <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#a39780;margin-bottom:6px">Contact</div>
+              <div style="font-size:14.5px;color:#544d42;margin-bottom:5px">{{ phone }}</div>
+              <a href="{{ websiteHref }}" target="_blank" style="font-size:14px;font-weight:700;color:{{ color }};text-decoration:none;word-break:break-all">{{ website }}</a>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <a href="{{ websiteHref }}" target="_blank" style="flex:1;text-align:center;padding:12px;border-radius:12px;background:{{ color }};color:#fff;font-weight:700;font-size:14px;text-decoration:none">Visit website</a>
+          <a href="{{ mapsHref }}" target="_blank" style="flex:none;padding:12px 14px;border-radius:12px;background:#fff;border:1.5px solid #e0d8c8;color:#7a6f5c;font-weight:700;font-size:14px;text-decoration:none">Map</a>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ isOnline }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid #d8e6e7;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.05)">
+          <div style="height:118px;background:linear-gradient(135deg,#2f7d8c,#3f9aa8);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff">
+            <span style="font-size:26px;line-height:1;margin-bottom:6px">◱</span>
+            <span style="font-size:13px;font-weight:700">Online business</span>
+            <span style="font-size:11.5px;opacity:.9">Serving the Irving area</span>
+          </div>
+          <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px">
+            <div>
+              <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#a39780;margin-bottom:6px">Find them</div>
+              <sc-for list="{{ onlineLinks }}" as="l" hint-placeholder-count="2">
+                <a href="{{ l.href }}" target="_blank" style="display:flex;align-items:center;gap:7px;font-size:13.5px;font-weight:700;color:#2f7d8c;text-decoration:none;margin-bottom:7px">{{ l.label }}</a>
+              </sc-for>
+            </div>
+            <sc-if value="{{ hasOrders }}" hint-placeholder-val="{{ false }}">
+              <div style="height:1px;background:#eef2f2"></div>
+              <div>
+                <div style="font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#a39780;margin-bottom:4px">Orders</div>
+                <div style="font-size:14px;color:#544d42;line-height:1.5">{{ ordersNote }}</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <a href="{{ primaryHref }}" target="_blank" style="display:block;text-align:center;padding:13px;border-radius:12px;background:#2f7d8c;color:#fff;font-weight:700;font-size:14px;text-decoration:none">{{ primaryLabel }}</a>
+        </sc-if>
+      </div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { ready: false };
+
+  componentDidMount() {
+    this._poll = setInterval(() => {
+      this.ensureMap();
+      if ((this.map || this._online) && this._poll) { clearInterval(this._poll); this._poll = null; }
+    }, 150);
+    this.ensureMap();
+  }
+  componentDidUpdate() { this.ensureMap(); }
+  componentWillUnmount() { if (this._poll) clearInterval(this._poll); }
+
+  getId() {
+    try {
+      const p = new URLSearchParams(window.location.search);
+      return p.get('id') || 'holy-trinity-seminary';
+    } catch (e) { return 'holy-trinity-seminary'; }
+  }
+
+  resource() {
+    const data = window.IRVING_DIRECTORY;
+    if (!data) return null;
+    const id = this.getId();
+    return data.resources.find(r => r.id === id) || data.resources[0];
+  }
+
+  // Build the locator map imperatively into an isolated child, and rebuild it
+  // if React ever remounts the container. Online listings have no map.
+  ensureMap() {
+    if (!window.IRVING_DIRECTORY) return;
+    const r = this.resource();
+    if (!r) return;
+    const online = r.online || typeof r.lat !== 'number' || typeof r.lng !== 'number';
+    if (online) { this._online = true; return; }
+    if (!window.L) return;
+    const host = document.getElementById('detailMap');
+    if (!host) return;
+    const attached = this.map && this.map._container && host.contains(this.map._container);
+    if (attached) return;
+    if (this.map) { try { this.map.remove(); } catch (e) {} this.map = null; }
+    host.innerHTML = '';
+    const meta = window.IRVING_DIRECTORY.categories[r.category];
+    // Isolate Leaflet from React: mount into an imperatively-created child.
+    const el = document.createElement('div');
+    el.style.cssText = 'height:100%;width:100%';
+    host.appendChild(el);
+    const map = L.map(el, { scrollWheelZoom: false, zoomControl: false, dragging: false, attributionControl: false }).setView([r.lat, r.lng], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd' }).addTo(map);
+    const icon = L.divIcon({
+      html: '<div style="width:24px;height:24px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:' + meta.color + ';border:2.5px solid #fff;box-shadow:0 2px 6px rgba(40,30,15,.4)"></div>',
+      className: 'cd-pin', iconSize: [24, 24], iconAnchor: [12, 24]
+    });
+    L.marker([r.lat, r.lng], { icon }).addTo(map);
+    this.map = map;
+    setTimeout(() => { try { map.invalidateSize(); } catch (e) {} }, 250);
+  }
+
+  renderVals() {
+    const data = window.IRVING_DIRECTORY;
+    if (!data) return { loaded: false, name: '', massList: [], hasMass: false };
+    const r = this.resource();
+    const meta = data.categories[r.category];
+    const website = r.website || '';
+    const online = !!(r.online || typeof r.lat !== 'number' || typeof r.lng !== 'number');
+    const igHandle = (r.instagram || '').replace(/^@/, '');
+    const onlineLinks = [];
+    if (r.instagram) onlineLinks.push({ label: '◎ ' + r.instagram, href: 'https://instagram.com/' + igHandle });
+    if (website) onlineLinks.push({ label: '↗ ' + website, href: 'https://' + website.replace(/^https?:\/\//, '') });
+    if (r.email) onlineLinks.push({ label: '✉ ' + r.email, href: 'mailto:' + r.email });
+    if (r.phone) onlineLinks.push({ label: '☎ ' + r.phone, href: 'tel:' + r.phone.replace(/[^0-9+]/g, '') });
+    const primaryHref = r.instagram ? 'https://instagram.com/' + igHandle
+      : website ? 'https://' + website.replace(/^https?:\/\//, '')
+      : r.email ? 'mailto:' + r.email : '#';
+    const primaryLabel = r.instagram ? 'Message on Instagram' : website ? 'Visit website' : 'Get in touch';
+    const photo = r.heroPhoto || null;
+    const needsPhoto = !photo;
+    const heroBg = photo
+      ? "background:#2b2620 url('" + photo + "') center/cover no-repeat;"
+      : "background:radial-gradient(120% 120% at 30% 18%, rgba(255,255,255,.12), rgba(0,0,0,.18)), " + meta.color + ";";
+    const gallery = Array.isArray(r.gallery) ? r.gallery : [];
+    const galleryTiles = gallery.length
+      ? gallery.slice(0, 3).map(u => ({ fallback: false, style: "aspect-ratio:4/3;border-radius:12px;background:#2b2620 url('" + u + "') center/cover no-repeat" }))
+      : [1, 2, 3].map(() => ({ fallback: true, style: "aspect-ratio:4/3;border-radius:12px;background:#faf6ee;border:1.5px dashed #ddd3c1;display:flex;flex-direction:column;align-items:center;justify-content:center" }));
+    return {
+      loaded: true,
+      name: r.name,
+      catLabel: meta.label,
+      color: meta.color,
+      address: r.address,
+      heroSub: online ? 'Online / home-based · Serving the Irving area' : r.address,
+      isOnline: online,
+      isPhysical: !online,
+      onlineLinks: onlineLinks,
+      primaryHref: primaryHref,
+      primaryLabel: primaryLabel,
+      hasOrders: !!(r.ordersNote && r.ordersNote.trim()),
+      ordersNote: r.ordersNote || '',
+      description: r.description,
+      hours: r.hours || 'Hours to confirm',
+      phone: r.phone || '—',
+      website: website,
+      websiteHref: website ? 'https://' + website.replace(/^https?:\/\//, '') : '#',
+      mapsHref: 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(r.name + ' ' + r.address),
+      hasMass: !!(r.mass && r.mass.length),
+      massList: r.mass || [],
+      needsPhoto: needsPhoto,
+      heroBg: heroBg,
+      galleryTiles: galleryTiles
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "https://www.irving-catholic.net/*"
+  to = "https://irving-catholic.net/:splat"
+  status = 301
+  force = true
