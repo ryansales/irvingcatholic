@@ -11,13 +11,19 @@ Live domain: **irving-catholic.net** (Netlify, DNS on Netlify nameservers, domai
 Dreamhost). Repo: **ryansales/irvingcatholic**, branch `main`.
 
 ## IMPORTANT: this is not a design mock
-Unlike a typical design handoff, **these HTML files are the shipping site**. They are static,
-dependency-free (Leaflet from CDN only), and deploy as-is. Do not reimplement them in React/Vue
-unless the project owner explicitly asks for a rewrite — the correct default is to keep editing
-these files. A framework rewrite would add a build step and lose the "edit one JSON file to add a
-listing" property that the owner relies on.
+Unlike a typical design handoff, **these HTML files are the shipping site**. They have no build
+step and deploy as-is. Do not reimplement them in React/Vue unless the project owner explicitly
+asks for a rewrite — the correct default is to keep editing these files. A framework rewrite would
+add a build step and lose the "edit one JSON file to add a listing" property that the owner relies
+on.
+
+They are not, however, dependency-free at runtime: `support.js` loads **React 18 and ReactDOM from
+unpkg** and renders the pages client-side, and both pages load **Leaflet** from unpkg as well. If
+unpkg is unreachable the pages render completely blank — there is no server-rendered fallback. See
+Known gaps.
 
 Fidelity: **high** — final colors, type, spacing, and copy.
+
 
 ## Repo layout (what is deployed)
 Files sit at the repo root; Netlify publishes `.` with no build command.
@@ -107,6 +113,40 @@ Current contents: **27 listings** — 6 churches, 6 schools, 3 religious/seminar
 3 Catholic businesses, 4 Catholic owned; 3 of those are online-only and are clearly marked
 `EXAMPLE ONLINE LISTING` in their descriptions (placeholders to be replaced with real businesses).
 
+## Checks (CI)
+Because there is no build step, nothing catches a bad edit between the commit and the live site —
+so the checks do it. They run on every pull request and every push to `main` (`.github/workflows/ci.yml`),
+and they need no dependencies beyond Node 22 except for the browser test.
+
+```sh
+node scripts/validate-data.mjs     # directory-data.js is sane
+node scripts/check-static.mjs      # pages, local references, hosting config
+cd tests && npm install && npm test  # renders the real pages in Chromium
+```
+
+| Check | What it protects |
+| --- | --- |
+| `node --check` on every JS file | A syntax error in `directory-data.js` blanks the entire site |
+| `scripts/validate-data.mjs` | Duplicate slugs, unknown categories, missing fields, `https://` creeping into `website`, photo paths that do not exist, coordinates outside Irving, online listings carrying map pins |
+| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `.`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
+| `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears and is reachable by a plain link, search filters/clears and `?q=` reopens it, map pins and the boundary draw, detail pages show name/address/phone/Mass times, each carries its own title/canonical/OG tags and parseable JSON-LD, placeholders and unknown `?id=` are `noindex`, no uncaught errors |
+| `.github/workflows/link-check.yml` | Weekly: every listing website and CDN asset still resolves. Files one issue, updates it in place, closes it when clean. Deliberately not on pull requests — a parish's host having a bad morning should not block a merge |
+
+The smoke test serves React, ReactDOM, and Leaflet from `tests/node_modules` instead of unpkg, so
+CI never depends on a CDN. Those versions are pinned to exactly what the pages request; if they
+drift apart the test fails and tells you to move both together.
+
+The three example online listings are reported as a warning, not an error — they ship on purpose
+until real businesses replace them.
+
+Because `seo.js` writes the head at runtime, the tags that matter are asserted on the *rendered*
+page in the smoke test, not on the file. Checking the file would only ever see the fallbacks.
+
+`SMOKE_CPU_THROTTLE=4 npm test` runs the browser test with the CPU slowed to roughly what a shared
+CI runner gives you. Worth using before pushing anything that touches the map: this site has
+timing-sensitive map code, and a laptop is fast enough to hide it (issue #4 passed locally at full
+speed and failed on CI twice).
+
 ## Design tokens
 **Colors**
 - Page background `#F4EFE5`; card/panel white `#FFFFFF`; warm off-white `#FBF8F1`
@@ -172,6 +212,11 @@ In roughly the owner's priority order:
 7. **Coordinates.** Owner-supplied and marked approximate in the data file's header comment;
    worth verifying against the real campuses.
 8. **Catholic Owned listings** are being gathered manually by the owner and will arrive as data edits.
+9. **unpkg is a single point of failure.** React, ReactDOM, and Leaflet are all fetched from
+   unpkg at page load and everything is rendered client-side, so an unpkg outage — or a visitor
+   on a network that blocks it — gets a blank page, not a degraded one. Vendoring those four
+   files into the repo and pointing the tags at local paths would remove the dependency without
+   introducing a build step. The weekly link check watches unpkg but cannot prevent the outage.
 
 ## Assets
 - `images/blessed-virgin.jpg` — 418×512 engraving of Saint Mary the Blessed Virgin, public domain,
@@ -184,3 +229,6 @@ In roughly the owner's priority order:
 - `directory-data.js`, `support.js`, `seo.js`, `image-slot.js`, `images/blessed-virgin.jpg`
 - `netlify.toml`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `tools/generate-sitemap.js`
 - `Home.dc.html`, `Resource Detail.dc.html` — design-source versions of the two pages
+- `scripts/`, `tests/`, `.github/` — the checks described above. None of it is served: Netlify
+  publishes the repo root, and the test harness keeps its `package.json` inside `tests/` on
+  purpose so that Netlify does not start installing dependencies on every deploy.

@@ -1,0 +1,5 @@
+node_modules/
+.DS_Store
+
+# Written by image-slot.js while dragging images in during design work.
+.image-slots.state.json
