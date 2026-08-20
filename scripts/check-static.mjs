@@ -98,8 +98,7 @@ for (const file of htmlFiles) {
   const helmet = stripComments(readFileSync(join(repoRoot, file), 'utf8')).match(/<helmet[\s>][\s\S]*?<\/helmet\s*>/i)?.[0];
   if (!helmet) continue;
   for (const [, src] of helmet.matchAll(/<script[^>]*\bsrc="([^"]+)"/gi)) {
-    const where = DEPLOYED_PAGES.includes(file) ? report.error : report.warn;
-    where(file, `loads ${src} from inside <helmet> — it will execute twice; move it to <head> (issue #4)`);
+    report.error(file, `loads ${src} from inside <helmet> — it will execute twice; move it to <head> (issue #4)`);
   }
 }
 

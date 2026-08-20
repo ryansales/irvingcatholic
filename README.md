@@ -50,9 +50,9 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 run of `leaflet.js` replaces `window.L` with a fresh Leaflet and the
 markercluster plugin attached to the old one vanishes, which throws and silently
 stops the map filtering (issue #4). `scripts/check-static.mjs` fails the build if
-a script reappears inside `<helmet>` on either deployed page. The `.dc.html`
-design sources still carry the old arrangement and are flagged as a warning:
-they are reference only, but regenerating a page from one would reintroduce this.
+a script appears inside `<helmet>` in any page here, the `.dc.html` design
+sources included — regenerating a deployed page from one would otherwise
+reintroduce this.
 
 The design-source versions of the two pages are `Home.dc.html` and `Resource Detail.dc.html`
 (included in this bundle for reference). `index.html` / `listing.html` are those files with the
