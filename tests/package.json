@@ -5,7 +5,8 @@
   "description": "Browser smoke test for the site. Kept out of the repo root on purpose: Netlify publishes '.' with no build command, and a root package.json would make it start installing dependencies on every deploy.",
   "type": "module",
   "scripts": {
-    "test": "node smoke.mjs"
+    "test": "node smoke.mjs",
+    "test:map": "node map-race.mjs"
   },
   "devDependencies": {
     "leaflet": "1.9.4",

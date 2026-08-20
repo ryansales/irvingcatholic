@@ -3,20 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Third-party libraries load here, in the real page head, and deliberately
+     NOT inside the helmet block below. A script tag written there runs twice:
+     once when the browser parses it in the body, and again when support.js
+     copies it into the head. The second run of leaflet.js replaces window.L
+     with a fresh Leaflet, stripping the markercluster plugin off it — which
+     throws "Right-hand side of 'instanceof' is not an object" and silently
+     stops the map filtering. See issue #4. Keep script tags out of the helmet. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="./directory-data.js"></script>
 <script src="./support.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="./image-slot.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="directory-data.js"></script>
   <style>
     body{margin:0}
     a{color:#bf4a3c}
@@ -32,7 +40,6 @@
     .cd-pop .leaflet-popup-content{margin:14px 16px}
     .leaflet-bar a{color:#7a6f5c}
   </style>
-  <script src="./image-slot.js"></script>
 </helmet>
 <div style="min-height:100vh;background:#f4efe5;font-family:'Hanken Grotesk',sans-serif;color:#2b2620;position:relative">
 
@@ -165,9 +172,9 @@
       </div>
       <div>
         <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#a99a83;margin-bottom:14px">Get involved</div>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Suggest a listing</a>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Update your information</a>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Contact us</a>
+        <a href="suggest.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Suggest a listing</a>
+        <a href="update.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Update your information</a>
+        <a href="contact.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Contact us</a>
       </div>
     </div>
     <div style="max-width:1220px;margin:0 auto;padding:20px 34px 40px;border-top:1px solid #e2d9c8;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">

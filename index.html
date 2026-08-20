@@ -10,22 +10,29 @@
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:image:alt" content="Engraving of Saint Mary the Blessed Virgin">
+<!-- Third-party libraries load here, in the real <head>, and deliberately NOT
+     inside <helmet> below. A <script src> written inside <helmet> runs twice:
+     once when the browser parses it in the body, and again when support.js
+     copies it into <head>. The second run of leaflet.js replaces window.L with
+     a fresh Leaflet, stripping the markercluster plugin off it — which throws
+     "Right-hand side of 'instanceof' is not an object" and silently stops the
+     map filtering. See issue #4. Keep script tags out of <helmet>. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
 <script src="./directory-data.js"></script>
 <script src="./seo.js"></script>
 <script src="./support.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="./image-slot.js"></script>
 </head>
 <body>
 <x-dc>
 <helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="directory-data.js"></script>
   <style>
     body{margin:0}
     /* Mobile layout. The page is built from inline styles, so these overrides
@@ -58,7 +65,6 @@
     .cd-pop .leaflet-popup-content{margin:14px 16px}
     .leaflet-bar a{color:#7a6f5c}
   </style>
-  <script src="./image-slot.js"></script>
 </helmet>
 <div style="min-height:100vh;background:#f4efe5;font-family:'Hanken Grotesk',sans-serif;color:#2b2620;position:relative">
 
@@ -191,9 +197,9 @@
       </div>
       <div>
         <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#a99a83;margin-bottom:14px">Get involved</div>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Suggest a listing</a>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Update your information</a>
-        <a href="#" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Contact us</a>
+        <a href="suggest.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Suggest a listing</a>
+        <a href="update.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Update your information</a>
+        <a href="contact.html" style="display:block;font-size:14px;color:#5c5347;text-decoration:none;margin-bottom:10px">Contact us</a>
       </div>
     </div>
     <div style="max-width:1220px;margin:0 auto;padding:20px 34px 40px;border-top:1px solid #e2d9c8;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
@@ -380,25 +386,32 @@ class Component extends DCLogic {
   }
 
   applyFilter() {
-    // Rebuild only when the category set or query actually changes (not on hover/
-    // selection re-renders). Debounced so fast typing coalesces into one rebuild.
+    // Re-pin only when the category set or query actually changes (not on hover/
+    // selection re-renders). Debounced so fast typing coalesces into one pass.
+    // Note the signature is deliberately NOT recorded here — rebuildCluster()
+    // records it once it has actually succeeded, so a pass that bails out early
+    // is retried on the next render instead of being dropped for good.
     const sig = JSON.stringify(this.state.active) + '|' + (this.state.query || '');
-    if (sig === this._filterSig) return;
-    this._filterSig = sig;
+    if (sig === this._filterSig) return;   // already on the map
+    if (sig === this._pendingSig) return;  // already scheduled; don't restart the timer
+    this._pendingSig = sig;
     clearTimeout(this._rebuildT);
-    this._rebuildT = setTimeout(() => this.fullRebuild(), 120);
+    this._rebuildT = setTimeout(() => { this._pendingSig = null; this.refreshPins(); }, 120);
   }
 
-  // A full map rebuild is the only reliably-correct way to re-cluster in
-  // markercluster; incremental add/remove corrupts its internal state.
-  fullRebuild() {
-    const host = document.getElementById('homeMapHost');
-    if (!host || !window.L || !window.IRVING_DIRECTORY) return;
+  // Filtering swaps the cluster layer; it does not touch the map. Tearing the
+  // whole map down here used to be the approach, and it is what issue #4 was:
+  // Leaflet's zoom animation and markercluster's own animation frames outlive
+  // the 120ms debounce, so they reach for DOM that the teardown has already
+  // removed. Swapping the layer is also what the "markercluster corrupts on
+  // incremental add/remove" note below is really asking for — rebuildCluster()
+  // builds a fresh group from fresh marker instances every time, which is the
+  // safe operation. It has the side benefit of keeping the reader's zoom and
+  // pan instead of resetting the view on every keystroke.
+  refreshPins() {
+    if (!this.map || !window.L || !window.L.markerClusterGroup || !window.IRVING_DIRECTORY) return;
     this.data = window.IRVING_DIRECTORY;
-    if (this.map) { try { this.map.remove(); } catch (e) {} }
-    this.map = null; this.cluster = null; this.markers = {};
-    host.innerHTML = '';
-    this.buildMap(host);
+    this.rebuildCluster();
   }
   onSearch(e) {
     const q = e.target.value;

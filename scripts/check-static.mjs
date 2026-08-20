@@ -15,6 +15,11 @@ import { loadDirectory, createReport, repoRoot } from './lib/load-directory.mjs'
    held to the meta-tag rules. */
 const DEPLOYED_PAGES = ['index.html', 'listing.html'];
 
+/* Indexable pages that are not listings, so they are not derivable from the
+   data. Must stay in step with STATIC_PAGES in tools/generate-sitemap.js —
+   if the two drift, the sitemap check below fails and says so. */
+const STATIC_PAGES = ['suggest.html', 'update.html', 'contact.html'];
+
 /* Load order is load-bearing: seo.js reads the directory and rewrites the head
    before support.js paints. */
 const REQUIRED_SCRIPTS = ['directory-data.js', 'seo.js', 'support.js'];
@@ -35,6 +40,9 @@ if (!htmlFiles.length) report.error('repo', 'no HTML files found');
 
 /* ---------- local references resolve ---------- */
 const ATTR = /\b(?:href|src)\s*=\s*"([^"]*)"/gi;
+/* Comments can contain markup that looks like tags — including the note in the
+   page head that explains this very rule. */
+const stripComments = (html) => html.replace(/<!--[\s\S]*?-->/g, '');
 const isExternal = (u) => /^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(u);
 const isTemplated = (u) => u.includes('{{') || u.includes("' +") || u.includes('${');
 
@@ -85,6 +93,32 @@ for (const page of DEPLOYED_PAGES) {
   }
 }
 
+/* ---------- nothing executable inside <helmet> ---------- */
+/* support.js copies <helmet> children into <head>. For a <script src> the
+   browser has *already* run it while parsing the body, so the copy is a second
+   execution: leaflet.js re-runs, replaces window.L with a fresh Leaflet, and
+   the markercluster plugin attached to the old one disappears. That was issue
+   #4. Libraries belong in the real <head>. */
+for (const file of htmlFiles) {
+  const helmet = stripComments(readFileSync(join(repoRoot, file), 'utf8')).match(/<helmet[\s>][\s\S]*?<\/helmet\s*>/i)?.[0];
+  if (!helmet) continue;
+  for (const [, src] of helmet.matchAll(/<script[^>]*\bsrc="([^"]+)"/gi)) {
+    report.error(file, `loads ${src} from inside <helmet> — it will execute twice; move it to <head> (issue #4)`);
+  }
+}
+
+/* ---------- no page loads the same script twice ---------- */
+for (const file of htmlFiles) {
+  const counts = new Map();
+  for (const [, src] of stripComments(readFileSync(join(repoRoot, file), 'utf8')).matchAll(/<script[^>]*\bsrc="([^"]+)"/gi)) {
+    const key = src.replace(/^\.?\//, '');
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  for (const [src, n] of counts) {
+    if (n > 1) report.error(file, `loads ${src} ${n} times — it will execute ${n} times`);
+  }
+}
+
 /* ---------- the hand-run sitemap still matches the data ---------- */
 const sitemapPath = join(repoRoot, 'sitemap.xml');
 if (!existsSync(sitemapPath)) {
@@ -96,6 +130,7 @@ if (!existsSync(sitemapPath)) {
   const site = [...listed][0]?.match(/^https?:\/\/[^/]+/)?.[0] ?? 'https://irving-catholic.net';
   const expected = new Set([
     `${site}/`,
+    ...STATIC_PAGES.map((p) => `${site}/${p}`),
     ...loadDirectory().resources.filter((r) => !r.placeholder).map((r) => `${site}/listing.html?id=${r.id}`),
   ]);
   for (const loc of expected) {
