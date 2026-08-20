@@ -1,0 +1,49 @@
+name: Geocode List 1 addresses
+
+# Run this from the Actions tab: pick this workflow, click "Run workflow",
+# choose this branch, and press the green button. It geocodes the addresses in
+# review/list-1-physical-irving.csv, checks every result against the Irving city
+# limits, and commits the coordinates back to the branch you ran it on.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  geocode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Geocode and boundary-check
+        id: geocode
+        continue-on-error: true
+        run: python3 review/geocode.py
+
+      - name: Commit results
+        run: |
+          if [ -z "$(git status --porcelain -- review/)" ]; then
+            echo "Nothing changed under review/ — no coordinates to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A review/
+          git commit -m "Geocode List 1 addresses"
+          git push
+
+      - name: Report result
+        run: |
+          if [ "${{ steps.geocode.outcome }}" = "failure" ]; then
+            echo "::warning::One or more addresses missed or landed outside the Irving boundary."
+            echo "Coordinates that did resolve were still committed. Check the 'In Irving' column"
+            echo "in review/list-1-physical-irving.csv and the log above for which ones need a look."
+          else
+            echo "All addresses geocoded inside the Irving city limits."
+          fi
