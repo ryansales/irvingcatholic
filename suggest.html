@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suggest a listing — Irving Catholic</title>
+<meta name="description" content="Add a Catholic parish, school, ministry, or business in Irving, Texas to the Irving Catholic directory.">
+<link rel="canonical" href="https://irving-catholic.net/suggest.html">
+<meta property="og:title" content="Suggest a listing — Irving Catholic">
+<meta property="og:description" content="Add a Catholic parish, school, ministry, or business in Irving, Texas to the Irving Catholic directory.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Irving Catholic">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://irving-catholic.net/suggest.html">
+<meta property="og:image" content="https://irving-catholic.net/images/blessed-virgin.jpg">
+<meta property="og:image:alt" content="Engraving of Saint Mary the Blessed Virgin">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Suggest a listing — Irving Catholic">
+<meta name="twitter:description" content="Add a Catholic parish, school, ministry, or business in Irving, Texas to the Irving Catholic directory.">
+<meta name="twitter:image" content="https://irving-catholic.net/images/blessed-virgin.jpg">
+<meta name="theme-color" content="#bf4a3c">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="./forms.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="./directory-data.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back" href="index.html">← Back to the map</a>
+  <a class="wordmark" href="index.html">
+    <span class="mark">✦</span>
+    <span class="name">Irving Catholic</span>
+  </a>
+</div>
+
+<div class="wrap wrap-wide">
+
+  <div class="pagehead">
+    <div class="eyebrow">Suggest a listing</div>
+    <h1 class="display">Know a place that belongs<br>on the map?</h1>
+    <p class="lede">Parishes and chapels, schools, seminaries and religious houses, ministries, Catholic businesses, and businesses owned by Catholics — if it's <strong>in Irving</strong>, we want it listed. Every listing is free, and always will be.</p>
+    <p class="lede">Fill this out and it lands in one inbox for review. Nothing goes live automatically; a real person reads each one, checks the details, and adds it — usually within a week or two.</p>
+  </div>
+
+  <div class="aside">
+    <p><strong>Two ways to send it.</strong> Use the form below, or just email everything to <a href="mailto:ryan@salesfamily.net">ryan@salesfamily.net</a> — photos as attachments is perfectly fine. There's a copy-and-paste checklist at the <a href="#by-email">bottom of this page</a> if you'd rather write an email.</p>
+  </div>
+
+  <div class="aside">
+    <p><strong>Irving only.</strong> This directory covers the City of Irving — including Las Colinas and Valley Ranch. Wonderful places in Dallas, Grand Prairie, Coppell, and Farmers Branch are out of scope, and we do have to say no to them.</p>
+  </div>
+
+  <div id="errors" class="errors" role="alert" aria-live="assertive"></div>
+
+  <form id="suggestForm"
+        name="suggest-a-listing"
+        method="POST"
+        action="/thanks.html?sent=suggest"
+        data-netlify="true"
+        data-netlify-honeypot="bot-field"
+        enctype="multipart/form-data"
+        novalidate>
+
+    <input type="hidden" name="form-name" value="suggest-a-listing">
+    <p class="hidden"><label>Leave this field empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+
+    <!-- Generated at submit time so the notification email carries a block
+         that pastes straight into directory-data.js. -->
+    <input type="hidden" name="Listing type" id="gen-type" value="">
+    <input type="hidden" name="Suggested id" id="gen-id" value="">
+    <input type="hidden" name="Photos attached" id="gen-photos" value="">
+    <input type="hidden" name="Paste-ready JSON" id="gen-json" value="">
+
+    <!-- ============================================================ 1 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">1</span><h2 class="section">Where do people find it?</h2></div>
+      <p class="section-note">This decides whether the listing gets a pin on the map or a card in the online section.</p>
+
+      <div class="choices">
+        <label class="choice">
+          <input type="radio" name="Listing path" value="Physical — a place in Irving people can visit" checked>
+          <span class="dot"></span>
+          <span class="t">A place you can visit</span>
+          <span class="d">A church, campus, office, shop, or storefront with a street address in Irving. Gets a pin on the map.</span>
+        </label>
+        <label class="choice teal">
+          <input type="radio" name="Listing path" value="Online / home-based in Irving">
+          <span class="dot"></span>
+          <span class="t">Online or home-based</span>
+          <span class="d">Run from home, by appointment, or entirely online — but based in Irving. Listed in the “no storefront” section.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ============================================================ 2 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">2</span><h2 class="section">The basics</h2></div>
+      <p class="section-note">The name as it should appear, and where it fits in the directory.</p>
+
+      <div class="field">
+        <label for="s-name">Name<span class="req">*</span></label>
+        <input type="text" id="s-name" name="Name" placeholder="St. Luke Catholic Church" autocomplete="organization">
+        <p class="hint" id="slugHint">The web address will be <code>irving-catholic.net/listing.html?id=…</code></p>
+      </div>
+
+      <div class="field">
+        <span class="fieldset-label">Category<span class="req">*</span></span>
+        <div class="cat-grid" role="radiogroup" aria-label="Category">
+          <label class="cat">
+            <input type="radio" name="Category" value="church">
+            <span class="swatch" style="background:#BF4A3C"></span>
+            <span class="t">Churches &amp; Parishes</span>
+            <span class="d">Parishes, chapels, oratories, and mission churches of any rite.</span>
+          </label>
+          <label class="cat">
+            <input type="radio" name="Category" value="school">
+            <span class="swatch" style="background:#3F5A8C"></span>
+            <span class="t">Schools &amp; Universities</span>
+            <span class="d">Preschool through university, including homeschool co-ops.</span>
+          </label>
+          <label class="cat">
+            <input type="radio" name="Category" value="religious">
+            <span class="swatch" style="background:#8A5A7A"></span>
+            <span class="t">Orders &amp; Seminaries</span>
+            <span class="d">Religious houses, monasteries, convents, seminaries, study centers.</span>
+          </label>
+          <label class="cat">
+            <input type="radio" name="Category" value="ministry">
+            <span class="swatch" style="background:#6E8B4E"></span>
+            <span class="t">Ministries &amp; Non-profits</span>
+            <span class="d">Apostolates, charities, pregnancy centers, retreat and outreach work.</span>
+          </label>
+          <label class="cat">
+            <input type="radio" name="Category" value="business">
+            <span class="swatch" style="background:#C2882E"></span>
+            <span class="t">Catholic Businesses</span>
+            <span class="d">Sells or provides something <em>Catholic</em> — books, icons, sacramentals, sacred art.</span>
+          </label>
+          <label class="cat">
+            <input type="radio" name="Category" value="owned">
+            <span class="swatch" style="background:#2F7D8C"></span>
+            <span class="t">Catholic Owned</span>
+            <span class="d">Any trade at all — mechanic, café, dentist — proudly owned by a local Catholic.</span>
+          </label>
+        </div>
+        <p class="hint">Not sure between the last two? A rosary maker is a <strong>Catholic Business</strong>; a Catholic who runs a plumbing company is <strong>Catholic Owned</strong>.</p>
+      </div>
+    </div>
+
+    <!-- ==================================================== 3 physical -->
+    <div class="card step" id="physicalBlock">
+      <div class="step-head"><span class="step-no">3</span><h2 class="section">Address &amp; map pin</h2></div>
+      <p class="section-note">The pin is what puts it on the map. Search the address, then nudge the marker onto the actual door if it lands in the parking lot.</p>
+
+      <div class="field">
+        <label for="s-address">Street address in Irving<span class="req">*</span></label>
+        <input type="text" id="s-address" name="Address" placeholder="202 S MacArthur Blvd, Irving, TX 75060" autocomplete="street-address">
+        <p class="hint">Full street address, including the ZIP.</p>
+      </div>
+
+      <div class="field">
+        <span class="fieldset-label">Exact location<span class="req">*</span></span>
+        <p class="hint above">Click <strong>Find this address</strong>, or click anywhere on the map to place the pin yourself. Drag it to fine-tune.</p>
+        <div class="map-shell">
+          <div id="pinMap"></div>
+          <div class="map-bar">
+            <button type="button" class="btn btn-ghost btn-sm" id="geocodeBtn">Find this address</button>
+            <span class="map-status idle" id="pinStatus">No pin placed yet</span>
+          </div>
+        </div>
+        <input type="hidden" name="Latitude" id="s-lat" value="">
+        <input type="hidden" name="Longitude" id="s-lng" value="">
+        <p class="hint">The dashed outline is the Irving city limit. The pin has to sit inside it.</p>
+      </div>
+
+      <div class="field">
+        <label for="s-hours">Hours<span class="opt">optional but very useful</span></label>
+        <input type="text" id="s-hours" name="Hours" placeholder="Parish office Mon–Fri 9am–5pm; church open daily">
+        <p class="hint">Written however makes sense — office hours, campus hours, shop hours.</p>
+      </div>
+    </div>
+
+    <!-- ====================================================== 3 online -->
+    <div class="card step hidden" id="onlineBlock">
+      <div class="step-head"><span class="step-no">3</span><h2 class="section">Based in Irving</h2></div>
+      <p class="section-note">No address is published for online and home-based listings — but we do need to know it really is an Irving business.</p>
+
+      <div class="field">
+        <label for="s-zip">Irving ZIP code<span class="req">*</span></label>
+        <input type="text" id="s-zip" name="Irving ZIP (not published)" placeholder="75062" inputmode="numeric" maxlength="10" style="max-width:180px">
+        <p class="hint">Kept private — used only to confirm the business is inside Irving. Never shown on the site.</p>
+      </div>
+
+      <div class="field">
+        <label for="s-orders">How do people order or book?<span class="opt">optional</span></label>
+        <input type="text" id="s-orders" name="Orders note" placeholder="By appointment · 1 week notice">
+        <p class="hint">A short line — it shows in the “Orders” box on the listing page.</p>
+      </div>
+
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="s-irvingConfirm" name="Confirmed Irving-based" value="Yes">
+          <span>This business is based in Irving (including Las Colinas or Valley Ranch) and serves the Irving area.</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- ============================================================ 4 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">4</span><h2 class="section">How would you describe it?</h2></div>
+      <p class="section-note">Two pieces of writing: one line for the map, one paragraph for the listing page. Write them the way you'd describe the place to a friend.</p>
+
+      <div class="field">
+        <label for="s-blurb">One-line summary<span class="req">*</span></label>
+        <input type="text" id="s-blurb" name="Blurb" maxlength="140"
+               placeholder="Welcoming, multicultural Diocese of Dallas parish in north Irving.">
+        <div class="counter" id="blurbCount"></div>
+        <p class="hint">Shown on the map pin, the sidebar card, and search results. Aim for under 100 characters.</p>
+      </div>
+
+      <div class="field">
+        <label for="s-description">Full description<span class="req">*</span></label>
+        <textarea id="s-description" name="Description" rows="7" maxlength="900"
+                  placeholder="A short paragraph: what it is, who it serves, what makes it distinctive, anything a newcomer would want to know before visiting."></textarea>
+        <div class="counter" id="descCount"></div>
+        <p class="hint">Three or four sentences is perfect. This is the “About” paragraph on the listing page.</p>
+      </div>
+
+      <div class="field hidden" id="massField">
+        <label for="s-mass">Mass &amp; liturgy times<span class="opt">optional</span></label>
+        <textarea id="s-mass" name="Mass times" rows="6"
+                  placeholder="Sat Vigil 5:30pm&#10;Sun 8am, 10am, 12pm, 5:30pm Español&#10;Daily Mon–Fri 8am&#10;Confessions Sat 4–5pm"></textarea>
+        <p class="hint"><strong>One time per line.</strong> Include the language if it isn't English, plus confessions, adoration, and Divine Liturgy if they apply.</p>
+      </div>
+    </div>
+
+    <!-- ============================================================ 5 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">5</span><h2 class="section">How do people reach them?</h2></div>
+      <p class="section-note">Everything here is optional, but the more you fill in, the more useful the listing is.</p>
+
+      <div class="row">
+        <div class="field">
+          <label for="s-phone">Phone</label>
+          <input type="tel" id="s-phone" name="Phone" placeholder="(972) 259-3222">
+        </div>
+        <div class="field">
+          <label for="s-email">Public email</label>
+          <input type="email" id="s-email" name="Public email" placeholder="office@example.org">
+          <p class="hint">Only if they're happy to have it published.</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="s-website">Website</label>
+        <div class="prefix-input">
+          <span class="prefix">https://</span>
+          <input type="text" id="s-website" name="Website" placeholder="stlukeirving.org">
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="field">
+          <label for="s-instagram">Instagram</label>
+          <div class="prefix-input at">
+            <span class="prefix">@</span>
+            <input type="text" id="s-instagram" name="Instagram" placeholder="handle">
+          </div>
+        </div>
+        <div class="field">
+          <label for="s-facebook">Facebook</label>
+          <input type="text" id="s-facebook" name="Facebook" placeholder="facebook.com/page">
+        </div>
+        <div class="field">
+          <label for="s-etsy">Etsy or online shop</label>
+          <input type="text" id="s-etsy" name="Etsy or shop" placeholder="etsy.com/shop/name">
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ 6 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">6</span><h2 class="section">Photos</h2></div>
+      <p class="section-note">This is the single most helpful thing you can send. Listings without photos show a plain coloured card — with them, the page comes alive.</p>
+
+      <div class="aside">
+        <p><strong>What fits where:</strong> the <strong>banner</strong> runs across the top of the listing page, so landscape works best — a church façade, a storefront, a campus shot. The <strong>three smaller photos</strong> sit in a row underneath: interiors, details, people, product, whatever tells the story.</p>
+        <p>Any decent phone photo is fine. Under 5 MB each, please — bigger files can go by email.</p>
+      </div>
+
+      <div class="field">
+        <div class="photo-grid" style="grid-template-columns:1fr">
+          <div class="photo-slot hero">
+            <label class="photo-drop">
+              <input type="file" name="Banner photo" accept="image/*" data-slot="Banner">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span>
+              <span class="lbl">Banner photo — click or drop</span>
+              <span class="fname"></span>
+            </label>
+            <p class="slot-cap">Banner photo <span>— wide / landscape, roughly 1600 × 900</span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="fieldset-label">Three smaller photos<span class="opt">optional</span></span>
+        <div class="photo-grid">
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 1" accept="image/*" data-slot="Photo 1">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span>
+              <span class="lbl">Photo 1</span>
+              <span class="fname"></span>
+            </label>
+          </div>
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 2" accept="image/*" data-slot="Photo 2">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span>
+              <span class="lbl">Photo 2</span>
+              <span class="fname"></span>
+            </label>
+          </div>
+          <div class="photo-slot">
+            <label class="photo-drop">
+              <input type="file" name="Photo 3" accept="image/*" data-slot="Photo 3">
+              <button type="button" class="clear" aria-label="Remove photo">×</button>
+              <span class="glyph">✦</span>
+              <span class="lbl">Photo 3</span>
+              <span class="fname"></span>
+            </label>
+          </div>
+        </div>
+        <p class="slot-cap">Three smaller photos <span>— landscape 4:3 looks best</span></p>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="s-credit">Photo credit</label>
+          <input type="text" id="s-credit" name="Photo credit" placeholder="Photo: Jane Doe">
+          <p class="hint">Printed under the banner if you give one.</p>
+        </div>
+        <div class="field">
+          <label for="s-photolink">Or link to photos</label>
+          <input type="text" id="s-photolink" name="Photo link" placeholder="Google Drive, Dropbox, or a page we can pull from">
+          <p class="hint">Handy if you have a lot of them, or files too big to upload.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ 7 -->
+    <div class="card step">
+      <div class="step-head"><span class="step-no">7</span><h2 class="section">About you</h2></div>
+      <p class="section-note">So we can come back with questions — most submissions need one or two. Your details are never published.</p>
+
+      <div class="row">
+        <div class="field">
+          <label for="s-yourname">Your name<span class="req">*</span></label>
+          <input type="text" id="s-yourname" name="Submitted by" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="s-youremail">Your email<span class="req">*</span></label>
+          <input type="email" id="s-youremail" name="Your email" autocomplete="email">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="s-yourphone">Your phone<span class="opt">optional</span></label>
+          <input type="tel" id="s-yourphone" name="Your phone" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label for="s-relationship">Your connection to it<span class="req">*</span></label>
+          <select id="s-relationship" name="Relationship">
+            <option value="">Choose one…</option>
+            <option>I own it or work there</option>
+            <option>I'm authorised to speak for it</option>
+            <option>I'm a parishioner, parent, or member</option>
+            <option>I'm a customer or visitor who loves it</option>
+            <option>No connection — I just know it should be listed</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="s-notes">Anything else we should know?<span class="opt">optional</span></label>
+        <textarea id="s-notes" name="Notes" rows="4"
+                  placeholder="A good time to call, someone we should ask first, a detail that didn't fit above…"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="check">
+          <input type="checkbox" id="s-accurate" name="Confirmed accurate" value="Yes">
+          <span>Everything here is accurate as far as I know, and I understand a person will check it before anything goes live.<span class="req">*</span></span>
+        </label>
+        <label class="check">
+          <input type="checkbox" id="s-photorights" name="Photo permission" value="Yes">
+          <span>Any photos I've attached are mine to share, and Irving Catholic may publish them on this listing.</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-bottom:34px">
+      <button type="submit" class="btn btn-primary">Send this listing</button>
+      <span class="note">Reviewed by a person — nothing publishes automatically.</span>
+    </div>
+  </form>
+
+  <!-- ========================================================== email -->
+  <div class="card" id="by-email">
+    <h2 class="section">Rather just send an email?</h2>
+    <p class="section-note">Completely fine. Email <a href="mailto:ryan@salesfamily.net">ryan@salesfamily.net</a> with photos attached and cover as much of this as you can:</p>
+
+    <div class="aside teal" style="margin-bottom:18px">
+      <p style="font-family:var(--sans);white-space:pre-line;margin:0">Name:
+Category: church / school / religious order / ministry / Catholic business / Catholic owned
+Address in Irving (or “online / home-based” + your ZIP):
+One-line summary:
+Full description (a short paragraph):
+Phone:
+Website:
+Public email:
+Hours:
+Mass &amp; confession times, one per line (churches only):
+Instagram / Facebook / Etsy:
+Photos: one wide banner photo + up to three smaller ones, attached
+Photo credit:
+Your name, email, and connection to it:</p>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-teal" id="emailTemplateBtn" href="mailto:ryan@salesfamily.net">Open this in my email app</a>
+      <span class="note">Pre-fills the checklist — and carries over anything you've already typed above.</span>
+    </div>
+  </div>
+
+</div>
+
+<footer class="sitefooter">
+  <div class="inner">
+    <div>
+      <div class="name">Irving Catholic</div>
+      <p>A community-maintained directory of Catholic churches, schools, ministries, and businesses in the Irving area.</p>
+    </div>
+    <div>
+      <div class="h">Get involved</div>
+      <a class="l" href="suggest.html">Suggest a listing</a>
+      <a class="l" href="update.html">Update your information</a>
+      <a class="l" href="contact.html">Contact us</a>
+    </div>
+  </div>
+  <div class="base">
+    <span>© 2026 Ryan Sales</span>
+    <span>Made with care in Irving, Texas</span>
+  </div>
+</footer>
+
+<script src="./forms.js"></script>
+<script>
+(function () {
+  var IC = window.ICForms;
+  var form = document.getElementById('suggestForm');
+  var box = document.getElementById('errors');
+
+  var el = {
+    name: document.getElementById('s-name'),
+    address: document.getElementById('s-address'),
+    zip: document.getElementById('s-zip'),
+    orders: document.getElementById('s-orders'),
+    irvingConfirm: document.getElementById('s-irvingConfirm'),
+    blurb: document.getElementById('s-blurb'),
+    description: document.getElementById('s-description'),
+    mass: document.getElementById('s-mass'),
+    hours: document.getElementById('s-hours'),
+    phone: document.getElementById('s-phone'),
+    email: document.getElementById('s-email'),
+    website: document.getElementById('s-website'),
+    instagram: document.getElementById('s-instagram'),
+    facebook: document.getElementById('s-facebook'),
+    etsy: document.getElementById('s-etsy'),
+    credit: document.getElementById('s-credit'),
+    photolink: document.getElementById('s-photolink'),
+    yourname: document.getElementById('s-yourname'),
+    youremail: document.getElementById('s-youremail'),
+    relationship: document.getElementById('s-relationship'),
+    accurate: document.getElementById('s-accurate'),
+    lat: document.getElementById('s-lat'),
+    lng: document.getElementById('s-lng')
+  };
+
+  var physicalBlock = document.getElementById('physicalBlock');
+  var onlineBlock = document.getElementById('onlineBlock');
+  var massField = document.getElementById('massField');
+  var slugHint = document.getElementById('slugHint');
+  var pinStatus = document.getElementById('pinStatus');
+
+  function isOnline() {
+    var r = form.querySelector('input[name="Listing path"]:checked');
+    return !!r && r.value.indexOf('Online') === 0;
+  }
+  function category() {
+    var r = form.querySelector('input[name="Category"]:checked');
+    return r ? r.value : '';
+  }
+
+  /* ---------------------------------------------------- path switching */
+
+  function syncPath() {
+    var online = isOnline();
+    physicalBlock.classList.toggle('hidden', online);
+    onlineBlock.classList.toggle('hidden', !online);
+    if (!online) setTimeout(picker.invalidate, 30);
+  }
+  IC.$$('input[name="Listing path"]', form).forEach(function (r) {
+    r.addEventListener('change', syncPath);
+  });
+
+  /* Mass times only make sense for churches and religious houses. */
+  function syncCategory() {
+    var c = category();
+    massField.classList.toggle('hidden', !(c === 'church' || c === 'religious'));
+  }
+  IC.$$('input[name="Category"]', form).forEach(function (r) {
+    r.addEventListener('change', syncCategory);
+  });
+
+  /* -------------------------------------------------- slug + duplicates */
+
+  function existingIds() {
+    var d = window.IRVING_DIRECTORY;
+    return (d && d.resources) ? d.resources : [];
+  }
+
+  function syncSlug() {
+    var slug = IC.slugify(el.name.value);
+    if (!slug) {
+      slugHint.innerHTML = 'The web address will be <code>irving-catholic.net/listing.html?id=…</code>';
+      return;
+    }
+    var clash = existingIds().filter(function (r) { return r.id === slug; })[0];
+    if (clash) {
+      slugHint.innerHTML = '<strong style="color:var(--accent)">Already listed:</strong> ' +
+        '<a href="listing.html?id=' + clash.id + '" target="_blank">' + clash.name + '</a>. ' +
+        'If something about it needs changing, <a href="update.html?id=' + clash.id + '">update that listing instead</a>.';
+    } else {
+      slugHint.innerHTML = 'Web address: <code>irving-catholic.net/listing.html?id=' + slug + '</code>';
+    }
+  }
+  el.name.addEventListener('input', syncSlug);
+
+  /* ------------------------------------------------------------ counters */
+
+  IC.wireCounter(el.blurb, document.getElementById('blurbCount'), 100);
+  IC.wireCounter(el.description, document.getElementById('descCount'), 700);
+
+  /* -------------------------------------------------------- photo slots */
+
+  var photoWarnings = [];
+  IC.wireAllPhotoSlots(form, function (msg) {
+    photoWarnings = [{ text: msg, el: null }];
+    IC.showErrors(box, photoWarnings);
+  });
+
+  /* ---------------------------------------------------------- map picker */
+
+  var geocodeBtn = document.getElementById('geocodeBtn');
+  var picker = IC.createPinPicker({
+    mapEl: document.getElementById('pinMap'),
+    statusEl: pinStatus,
+    latInput: el.lat,
+    lngInput: el.lng
+  });
+  geocodeBtn.addEventListener('click', function () { picker.geocode(el.address, geocodeBtn); });
+
+  /* --------------------------------------------------- email fallback */
+
+  var emailBtn = document.getElementById('emailTemplateBtn');
+  function refreshEmail() {
+    var online = isOnline();
+    emailBtn.href = IC.mailtoFrom(
+      'ryan@salesfamily.net',
+      'Irving Catholic — new listing: ' + (IC.trim(el.name.value) || '(name)'),
+      [
+        'Name: ' + IC.trim(el.name.value),
+        'Category: ' + (category() ? IC.categoryLabel(category()) : ''),
+        online ? 'Online / home-based in Irving. ZIP: ' + IC.trim(el.zip.value)
+               : 'Address in Irving: ' + IC.trim(el.address.value),
+        'One-line summary: ' + IC.trim(el.blurb.value),
+        'Full description: ' + IC.trim(el.description.value),
+        'Phone: ' + IC.trim(el.phone.value),
+        'Website: ' + IC.trim(el.website.value),
+        'Public email: ' + IC.trim(el.email.value),
+        online ? 'Orders: ' + IC.trim(el.orders.value) : 'Hours: ' + IC.trim(el.hours.value),
+        'Mass & confession times (one per line, churches only):',
+        IC.trim(el.mass.value),
+        'Instagram: ' + IC.trim(el.instagram.value),
+        'Facebook: ' + IC.trim(el.facebook.value),
+        'Etsy or shop: ' + IC.trim(el.etsy.value),
+        'Photo credit: ' + IC.trim(el.credit.value),
+        '',
+        'Photos attached: one wide banner photo + up to three smaller ones',
+        '',
+        'Submitted by: ' + IC.trim(el.yourname.value),
+        'Email: ' + IC.trim(el.youremail.value),
+        'Phone: ' + IC.trim(document.getElementById('s-yourphone').value),
+        'Connection to it: ' + el.relationship.value
+      ]
+    );
+  }
+  form.addEventListener('input', refreshEmail);
+  form.addEventListener('change', refreshEmail);
+
+  /* -------------------------------------------------------- validation */
+
+  form.addEventListener('submit', function (e) {
+    var errs = [];
+    var online = isOnline();
+
+    if (!IC.trim(el.name.value)) errs.push({ text: 'Give the listing a name.', el: el.name });
+    if (!category()) errs.push({ text: 'Pick a category.', el: form.querySelector('input[name="Category"]') });
+
+    if (online) {
+      if (!IC.trim(el.zip.value)) {
+        errs.push({ text: 'Add the Irving ZIP code — it stays private, but it’s how we confirm the business is in Irving.', el: el.zip });
+      } else if (!IC.looksIrving(el.zip.value)) {
+        errs.push({ text: '“' + IC.trim(el.zip.value) + '” isn’t an Irving ZIP code. This directory only covers the City of Irving.', el: el.zip });
+      }
+      if (!el.irvingConfirm.checked) {
+        errs.push({ text: 'Confirm the business is based in Irving.', el: el.irvingConfirm });
+      }
+    } else {
+      if (!IC.trim(el.address.value)) {
+        errs.push({ text: 'Add the street address.', el: el.address });
+      } else if (!IC.looksIrving(el.address.value)) {
+        errs.push({ text: 'That address doesn’t look like it’s in Irving. The directory only covers the City of Irving, Las Colinas, and Valley Ranch.', el: el.address });
+      }
+      if (!el.lat.value || !el.lng.value) {
+        errs.push({ text: 'Place the map pin — click “Find this address”, or click the map where the place actually is.', el: document.getElementById('geocodeBtn') });
+      } else if (!IC.insideIrving(parseFloat(el.lat.value), parseFloat(el.lng.value))) {
+        errs.push({ text: 'The map pin is outside the Irving city limits. Drag it inside the dashed outline.', el: document.getElementById('geocodeBtn') });
+      }
+    }
+
+    if (IC.trim(el.blurb.value).length < 15) {
+      errs.push({ text: 'Write the one-line summary — a short sentence is all it needs.', el: el.blurb });
+    }
+    if (IC.trim(el.description.value).length < 60) {
+      errs.push({ text: 'The description needs a bit more — two or three sentences.', el: el.description });
+    }
+
+    if (!IC.trim(el.yourname.value)) errs.push({ text: 'Add your name.', el: el.yourname });
+    if (!IC.isEmail(el.youremail.value)) errs.push({ text: 'Add your email so we can follow up with questions.', el: el.youremail });
+    if (!el.relationship.value) errs.push({ text: 'Tell us your connection to this place.', el: el.relationship });
+    if (!el.accurate.checked) errs.push({ text: 'Tick the box confirming the details are accurate.', el: el.accurate });
+
+    if (IC.showErrors(box, errs)) { e.preventDefault(); return; }
+
+    /* Everything checks out — build the paste-ready block. */
+    var listing = IC.buildListing({
+      id: IC.slugify(el.name.value),
+      name: IC.trim(el.name.value),
+      category: category(),
+      online: online,
+      address: IC.trim(el.address.value),
+      lat: parseFloat(el.lat.value),
+      lng: parseFloat(el.lng.value),
+      blurb: IC.trim(el.blurb.value),
+      description: IC.trim(el.description.value),
+      phone: IC.trim(el.phone.value),
+      email: IC.trim(el.email.value),
+      website: IC.cleanWebsite(el.website.value),
+      instagram: IC.cleanHandle(el.instagram.value),
+      facebook: IC.cleanFacebook(el.facebook.value),
+      etsy: IC.cleanWebsite(el.etsy.value),
+      hours: IC.trim(el.hours.value),
+      ordersNote: IC.trim(el.orders.value),
+      mass: IC.lines(el.mass.value),
+      heroPhoto: null,
+      photoCredit: IC.trim(el.credit.value) || null,
+      gallery: []
+    });
+
+    document.getElementById('gen-type').value = online ? 'Online / home-based' : 'Physical (mapped)';
+    document.getElementById('gen-id').value = listing.id;
+    var photos = IC.photoSummary(form);
+    document.getElementById('gen-photos').value = photos.length ? photos.join(' · ') : 'none attached';
+    document.getElementById('gen-json').value = IC.stringify(listing);
+  });
+
+  /* ------------------------------------------------------------- init */
+
+  IC.whenData(function () {
+    picker.build();
+    syncSlug();
+  });
+  syncPath();
+  syncCategory();
+  refreshEmail();
+})();
+</script>
+</body>
+</html>
