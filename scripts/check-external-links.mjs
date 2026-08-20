@@ -8,7 +8,7 @@
 */
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadDirectory, repoRoot } from './lib/load-directory.mjs';
+import { loadDirectory, siteRoot } from './lib/load-directory.mjs';
 
 const TIMEOUT_MS = 20000;
 const CONCURRENCY = 6;
@@ -37,8 +37,8 @@ for (const r of dir.resources) {
     add(`https://${r.website.trim().replace(/^\/+/, '')}`, `${r.name} (${r.id})`);
   }
 }
-for (const file of readdirSync(repoRoot).filter((f) => f.endsWith('.html'))) {
-  const html = readFileSync(join(repoRoot, file), 'utf8');
+for (const file of readdirSync(siteRoot).filter((f) => f.endsWith('.html'))) {
+  const html = readFileSync(join(siteRoot, file), 'utf8');
   for (const [tag] of html.matchAll(/<(?:link|script)\b[^>]*>/gi)) {
     /* preconnect/dns-prefetch point at bare origins that answer 404 by design */
     if (/rel\s*=\s*"(?:preconnect|dns-prefetch)"/i.test(tag)) continue;

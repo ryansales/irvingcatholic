@@ -8,7 +8,7 @@ import { existsSync } from 'node:fs';
 import { join, extname, normalize, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { repoRoot } from '../../scripts/lib/load-directory.mjs';
+import { siteRoot } from '../../scripts/lib/load-directory.mjs';
 
 const here = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -39,11 +39,12 @@ const TYPES = {
   '.txt': 'text/plain; charset=utf-8',
 };
 
-/* Serve the repo the way Netlify does: publish ".", no build, no rewrites. */
+/* Serve site/ the way Netlify does: publish "site", no build, no rewrites.
+   Nothing above the publish root is reachable, which is exactly the point. */
 export async function serveSite() {
   const server = createServer(async (req, res) => {
     const path = decodeURIComponent(req.url.split('?')[0]);
-    const file = join(repoRoot, normalize(path === '/' ? '/index.html' : path).replace(/^(\.\.[/\\])+/, ''));
+    const file = join(siteRoot, normalize(path === '/' ? '/index.html' : path).replace(/^(\.\.[/\\])+/, ''));
     try {
       if (!(await stat(file)).isFile()) throw new Error('not a file');
       res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' });

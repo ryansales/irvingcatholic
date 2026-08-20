@@ -1,7 +1,9 @@
 node_modules/
 .DS_Store
 
-# Written by image-slot.js while dragging images in during design work.
+# Written by design/image-slot.js while dragging images in during design work.
+# It is a sibling of the .dc.html file that uses it, so it lands in design/.
+design/.image-slots.state.json
 .image-slots.state.json
 
 # Python bytecode from review/geocode.py

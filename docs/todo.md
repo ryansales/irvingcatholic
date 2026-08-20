@@ -40,6 +40,11 @@ This does add a step the project has so far avoided. Two ways to keep the
 - Or add `command = "node tools/prerender.js"` to `netlify.toml` so Netlify runs
   it on deploy. Adding a listing stays a one-file edit; the build is invisible.
 
+Either way the generator writes into `site/` — that is the publish root, so a
+page emitted anywhere else is not served. Emitting into `site/listing/<slug>/`
+keeps the ~24 generated files from crowding the six hand-edited pages, which is
+the layout the repo split was done in anticipation of.
+
 The second is probably right, despite the README's stance against a build step —
 the objection there is to a *framework rewrite*, not to a 60-line generator.
 
@@ -205,9 +210,12 @@ Fixes:
   detail grid 706px. Both stack now; neither page scrolls horizontally at 390px.
 - **`?q=`** seeds and reflects the search, so the schema.org `SearchAction`
   points at a URL that works and a search is shareable.
-- `lang="en"`, a favicon, a richer homepage title and description, and
-  `X-Robots-Tag: noindex` on `Home.dc.html`, `Resource Detail.dc.html` and
-  `README.md` — `publish = "."` makes those live URLs duplicating the real pages.
+- `lang="en"`, a favicon, and a richer homepage title and description.
+- The `X-Robots-Tag: noindex` allowlist that used to hide `Home.dc.html`,
+  `Resource Detail.dc.html` and `README.md` is **gone, and so is the problem it
+  patched**: Netlify now publishes `site/`, and the design sources, notes,
+  checks and research all live above it, so they are not URLs at all. A new
+  file is out of the deploy by default instead of by remembering to add a rule.
 
 Verified in headless Chromium at 390px and 1440px: correct per-listing metadata,
 valid JSON-LD, 27 crawlable links, no console errors.

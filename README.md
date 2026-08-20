@@ -25,16 +25,31 @@ Known gaps.
 Fidelity: **high** — final colors, type, spacing, and copy.
 
 
-## Repo layout (what is deployed)
-Files sit at the repo root; Netlify publishes `.` with no build command.
+## Repo layout
+The repo is split by one rule: **`site/` is the deploy, everything else is not.** Netlify
+publishes `site/` with no build command, so a visitor can reach exactly what is in that folder and
+nothing above it. Notes, checks, raw research, and the design sources sit outside it and are
+therefore unreachable by default — no `robots.txt` entry or `X-Robots-Tag` header needed to hide
+them.
 
+```
+site/       the deployed site — this is the web root
+design/     .dc.html design sources + image-slot.js  (never deployed)
+docs/       todo.md and future notes                 (never deployed)
+scripts/    data and static checks (CI)              (never deployed)
+tests/      browser tests                            (never deployed)
+tools/      generate-sitemap.js                      (never deployed)
+review/     raw research lists behind the listings   (never deployed)
+README.md, netlify.toml, .github/
+```
+
+### `site/` — what ships
 | File | Role |
 | --- | --- |
 | `index.html` | Homepage: intro, search, map, sidebar list, online-only section, footer |
 | `listing.html` | Detail page for any listing; reads `?id=<slug>` |
 | `directory-data.js` | **Single source of truth** for all listings, categories, and the Irving boundary |
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
-| `image-slot.js` | Drag-and-drop image placeholder component (used for the intro band image) |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
 | `contact.html` | Contact form → Netlify Forms (`contact`) |
 | `suggest.html` | Suggest-a-listing form → Netlify Forms (`suggest-a-listing`) |
@@ -44,11 +59,32 @@ Files sit at the repo root; Netlify publishes `.` with no build command.
 | `forms.js` | Shared behaviour: validation, slug, Irving check, pin picker, JSON builder |
 | `seo.js` | Per-page title / description / canonical / OG + Twitter tags and JSON-LD, built from `directory-data.js` at load time. Loads in `<head>` before `support.js` |
 | `sitemap.xml` | Generated — run `node tools/generate-sitemap.js` after adding or removing a listing |
-| `tools/generate-sitemap.js` | Regenerates `sitemap.xml`. Run by hand; **not** a build step |
+| `robots.txt` | Allows everything and points at `sitemap.xml`. It has nothing to hide any more: what is not in `site/` is not on the internet |
 | `favicon.svg` | Brand-red rounded square with the ✦ mark |
-| `todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
-| `netlify.toml` | `publish = "."`, a 301 from `www` to the bare domain, `X-Robots-Tag: noindex` on the design-source files and README, and a long cache on `/images/*` |
-| `robots.txt` | Allows all except the design-source files, README, and `/tools/`; points at `sitemap.xml` |
+
+Because `site/` is the web root, a root-relative URL like `/favicon.svg` resolves to
+`site/favicon.svg`. A page in `site/` must never reference `../` — that resolves fine in a
+checkout and 404s in production, so `scripts/check-static.mjs` fails the build on it.
+
+### Outside the deploy
+| Path | Role |
+| --- | --- |
+| `design/Home.dc.html`, `design/Resource Detail.dc.html` | Design-source versions of the two pages. They load the real `../site/directory-data.js` and `../site/support.js`, so they render live data |
+| `design/image-slot.js` | Drag-and-drop image placeholder used by the design sources. **Design-time only** — see below |
+| `docs/todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
+| `netlify.toml` | `publish = "site"` and a 301 from `www` to the bare domain. That is nearly all it needs to say now |
+| `tools/generate-sitemap.js` | Regenerates `site/sitemap.xml`. Run by hand; **not** a build step |
+
+**`image-slot.js` must not come back into a deployed page.** It is a 65KB drag-and-drop editor
+whose whole point is design-time editing. In production `window.omelette` is absent, so it renders
+the image read-only — 65KB of custom element to draw one static `<img>`, plus a `fetch()` for a
+`.image-slots.state.json` sidecar that is gitignored and therefore 404s on every single homepage
+load. It also puts the art inside a shadow root, where crawlers and the browser's preload scanner
+cannot see it. `site/index.html` uses a plain `<img>` instead; `design/Home.dc.html` keeps the slot,
+because that is where dragging an image in is the point. `scripts/check-static.mjs` fails the build
+if either `image-slot.js` or an `<image-slot>` element appears in a deployed page — regenerating
+`index.html` from the design source would otherwise drag it back in silently, exactly like the
+`<helmet>` rule below.
 
 **Script tags belong in `<head>`, never inside `<helmet>`.** support.js copies
 `<helmet>` children into the head, but the browser has already run any
@@ -60,10 +96,12 @@ a script appears inside `<helmet>` in any page here, the `.dc.html` design
 sources included — regenerating a deployed page from one would otherwise
 reintroduce this.
 
-The design-source versions of the two pages are `Home.dc.html` and `Resource Detail.dc.html`
-(included in this bundle for reference). `index.html` / `listing.html` are those files with the
-detail-page URL changed from `Resource%20Detail.dc.html?id=` to `listing.html?id=` and real
-`<title>`/meta tags added.
+The design-source versions of the two pages are `design/Home.dc.html` and
+`design/Resource Detail.dc.html`. `site/index.html` / `site/listing.html` are those files with
+three deliberate changes: the detail-page URL goes from `Resource%20Detail.dc.html?id=` to
+`listing.html?id=`, real `<title>`/meta tags are added, and the `<image-slot>` intro band becomes a
+plain `<img>`. `check-static.mjs` enforces the last two, so a regeneration cannot quietly undo
+them.
 
 ## The data file
 `directory-data.js` assigns one global: `window.IRVING_DIRECTORY`.
@@ -203,7 +241,7 @@ laptop speed and failed reliably at 4x.
 | --- | --- |
 | `node --check` on every JS file | A syntax error in `directory-data.js` blanks the entire site |
 | `scripts/validate-data.mjs` | Duplicate slugs, unknown categories, missing fields, `https://` creeping into `website`, photo paths that do not exist, coordinates outside Irving, online listings carrying map pins |
-| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `.`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
+| `scripts/check-static.mjs` | Local `href`/`src` that point at files not in the repo, **a deployed page reaching outside `site/`** (resolves in a checkout, 404s in production), **`image-slot.js` or `<image-slot>` back in a deployed page**, a page that stopped loading `directory-data.js` / `seo.js` / `support.js` or loading them out of order, missing fallback title/description, `netlify.toml` no longer publishing `site`, and **a `sitemap.xml` that has drifted from the data** — the one manual step, so the one most likely to be forgotten |
 | `tests/smoke.mjs` | The part only a browser can see: pages actually render, every listing appears and is reachable by a plain link, search filters/clears and `?q=` reopens it, map pins and the boundary draw, detail pages show name/address/phone/Mass times, each carries its own title/canonical/OG tags and parseable JSON-LD, placeholders and unknown `?id=` are `noindex`, no uncaught errors |
 | `tests/map-race.mjs` | Issue #4: changing the filter while the map is animating. Runs with the CPU throttled, because none of it reproduces at laptop speed |
 | `.github/workflows/link-check.yml` | Weekly: every listing website and CDN asset still resolves. Files one issue, updates it in place, closes it when clean. Deliberately not on pull requests — a parish's host having a bad morning should not block a merge |
@@ -302,18 +340,30 @@ In roughly the owner's priority order:
    introducing a build step. The weekly link check watches unpkg but cannot prevent the outage.
 
 ## Assets
-- `images/blessed-virgin.jpg` — 418×512 engraving of Saint Mary the Blessed Virgin, public domain,
-  supplied by the owner. Used only as the intro band.
+- `site/images/blessed-virgin.jpg` — 418×512 engraving of Saint Mary the Blessed Virgin, public
+  domain, supplied by the owner. Used only as the intro band, as a plain `<img>` with
+  `object-fit: contain` inside a masked, `multiply`-blended wrapper.
 - No icon set; the few glyphs in the UI are text characters.
 - Fonts load from Google Fonts; Leaflet and Leaflet.markercluster load from unpkg. Nothing is bundled.
 
 ## Files in this bundle
-- `index.html`, `listing.html` — the deployed pages
+Deployed (`site/`):
+- `index.html`, `listing.html` — the two main pages
 - `contact.html`, `suggest.html`, `update.html`, `thanks.html` — the form pages
 - `forms.css`, `forms.js` — shared by the four form pages
-- `directory-data.js`, `support.js`, `seo.js`, `image-slot.js`, `images/blessed-virgin.jpg`
-- `netlify.toml`, `robots.txt`, `sitemap.xml`, `favicon.svg`, `tools/generate-sitemap.js`
-- `Home.dc.html`, `Resource Detail.dc.html` — design-source versions of the two pages
-- `scripts/`, `tests/`, `.github/` — the checks described above. None of it is served: Netlify
-  publishes the repo root, and the test harness keeps its `package.json` inside `tests/` on
-  purpose so that Netlify does not start installing dependencies on every deploy.
+- `directory-data.js`, `support.js`, `seo.js`, `images/blessed-virgin.jpg`
+- `robots.txt`, `sitemap.xml`, `favicon.svg`
+
+Not deployed:
+- `design/Home.dc.html`, `design/Resource Detail.dc.html`, `design/image-slot.js` — design sources
+- `docs/todo.md` — the SEO work queue
+- `review/` — the raw research lists the listings were built from. Some of it is contact
+  information for people who are deliberately **not** in the directory, which is a good reason for
+  it to sit outside the deploy
+- `scripts/`, `tests/`, `tools/`, `.github/` — the checks described above, plus the sitemap
+  generator
+- `netlify.toml`, `README.md`
+
+None of the second group is served: Netlify publishes `site/`, so anything above it is simply not
+addressable. The test harness also keeps its `package.json` inside `tests/` so Netlify never starts
+installing dependencies on a deploy.
