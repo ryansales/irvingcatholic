@@ -86,6 +86,10 @@ for (const [url, local] of Object.entries(CDN_MAP)) {
 const browser = await chromium.launch();
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
 
+/* A shared CI runner is several times slower than a laptop, and this site has
+   timing-sensitive map code. SMOKE_CPU_THROTTLE=4 reproduces that locally. */
+const cpuThrottle = Number(process.env.SMOKE_CPU_THROTTLE || 1);
+
 /* OpenStreetMap asks that its tile servers not be used by automation, and a
    missing tile says nothing about whether our code works. */
 await context.route('**://*.tile.openstreetmap.org/**', (route) => route.abort());
@@ -118,6 +122,46 @@ context.on('page', (page) => {
 });
 
 const page = await context.newPage();
+if (cpuThrottle > 1) {
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpuThrottle });
+  console.log(`(CPU throttled ${cpuThrottle}x)`);
+}
+
+/* buildMap() schedules an invalidateSize + fitBounds 250ms after the map
+   appears, and fitBounds animates. Anything that changes the query while that
+   is running tears the map out from under Leaflet — see issue #4. Rather than
+   guess how long that takes on a given machine, wait for the map container to
+   go quiet and stay quiet. */
+const mapIdle = async () => {
+  await page
+    .waitForFunction(() => !!document.querySelector('#homeMapHost .leaflet-container'), null, {
+      timeout: 20000,
+    })
+    .catch(() => {});
+  await page.evaluate(() => {
+    window.__mapQuietSince = 0;
+  });
+  await page
+    .waitForFunction(
+      () => {
+        const el = document.querySelector('#homeMapHost .leaflet-container');
+        if (!el) return false;
+        if (el.classList.contains('leaflet-zoom-anim')) {
+          window.__mapQuietSince = 0;
+          return false;
+        }
+        if (!window.__mapQuietSince) {
+          window.__mapQuietSince = Date.now();
+          return false;
+        }
+        return Date.now() - window.__mapQuietSince > 800;
+      },
+      null,
+      { timeout: 20000, polling: 100 },
+    )
+    .catch(() => {});
+};
 
 /* seo.js rewrites the head at load time, so the tags that matter are the
    rendered ones — reading the file would only show the fallbacks. */
@@ -219,12 +263,10 @@ if (hasSearch) {
      steps — typing the next query into a half-rebuilt map is a race, and one
      this test is not the right place to exercise. See issue #4. */
   const settle = async () => {
-    await page.waitForTimeout(200); // clear the debounce so the teardown has started
-    await page
-      .waitForFunction(() => !!document.querySelector('#homeMapHost .leaflet-container'), null, { timeout: 15000 })
-      .catch(() => {});
-    await page.waitForTimeout(500); // the post-build invalidateSize / fitBounds tick
+    await page.waitForTimeout(200); // clear the 120ms debounce so the rebuild has started
+    await mapIdle();
   };
+  await settle(); // the map is still settling from first paint
   const words = (s) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
   const subject = physical[0];
   const unrelated = physical.find(

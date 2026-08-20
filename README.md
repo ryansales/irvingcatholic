@@ -142,6 +142,11 @@ until real businesses replace them.
 Because `seo.js` writes the head at runtime, the tags that matter are asserted on the *rendered*
 page in the smoke test, not on the file. Checking the file would only ever see the fallbacks.
 
+`SMOKE_CPU_THROTTLE=4 npm test` runs the browser test with the CPU slowed to roughly what a shared
+CI runner gives you. Worth using before pushing anything that touches the map: this site has
+timing-sensitive map code, and a laptop is fast enough to hide it (issue #4 passed locally at full
+speed and failed on CI twice).
+
 ## Design tokens
 **Colors**
 - Page background `#F4EFE5`; card/panel white `#FFFFFF`; warm off-white `#FBF8F1`
