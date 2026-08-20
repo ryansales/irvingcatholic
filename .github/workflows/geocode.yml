@@ -1,9 +1,21 @@
 name: Geocode List 1 addresses
 
 # Run this from the Actions tab: pick this workflow, click "Run workflow",
-# choose this branch, and press the green button. It geocodes the addresses in
-# review/list-1-physical-irving.csv, checks every result against the Irving city
-# limits, and commits the coordinates back to the branch you ran it on.
+# choose a branch, and press the green button. It geocodes the addresses in
+# review/list-1-physical-irving.csv, checks every result against the Irving
+# city limits, and puts the results on their own branch for review.
+#
+# It cannot commit straight to main. The repository rules require every change
+# to arrive through a pull request with its required checks green, so a push
+# from this job is rejected with "Changes must be made through a pull request".
+# Instead the results go to a branch of their own and the job summary hands you
+# a one-click link to open the pull request.
+#
+# That link is deliberate rather than an automatic `gh pr create`: a pull
+# request opened with this workflow's own GITHUB_TOKEN does not start CI, so
+# the two required checks would sit unstarted and the pull request could never
+# be merged. Opening it yourself from the link is one click and CI runs
+# normally.
 
 on:
   workflow_dispatch:
@@ -15,7 +27,7 @@ jobs:
   geocode:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -26,24 +38,75 @@ jobs:
         continue-on-error: true
         run: python3 review/geocode.py
 
-      - name: Commit results
+      # Belt and braces: if the push below is ever rejected, the coordinates
+      # are still downloadable from this run rather than lost with the runner.
+      - name: Keep a copy of the results either way
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: geocode-results
+          path: |
+            review/list-1-physical-irving.csv
+            review/list-1-geocoded.js
+          if-no-files-found: ignore
+
+      - name: Push the results to their own branch
+        id: push
         run: |
           if [ -z "$(git status --porcelain -- review/)" ]; then
-            echo "Nothing changed under review/ — no coordinates to commit."
+            echo "Nothing changed under review/ — no coordinates to push."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          branch="geocode/list-1-${{ github.run_number }}"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
           git add -A review/
           git commit -m "Geocode List 1 addresses"
-          git push
+          # --force so re-running this same run overwrites its own scratch
+          # branch instead of failing on a non-fast-forward.
+          git push --force origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
 
-      - name: Report result
+      - name: Say what happened
         run: |
+          base="${{ github.ref_name }}"
+          branch="${{ steps.push.outputs.branch }}"
+          compare="${{ github.server_url }}/${{ github.repository }}/compare/${base}...${branch}?expand=1"
+          {
+            if [ "${{ steps.push.outputs.pushed }}" != "true" ]; then
+              echo "## No coordinates to review"
+              echo ""
+              echo "The geocoder changed nothing under \`review/\`. The log on the"
+              echo "\"Geocode and boundary-check\" step above says why."
+            else
+              echo "## Coordinates are ready"
+              echo ""
+              echo "### [Open the pull request]($compare)"
+              echo ""
+              echo "That link opens the normal \"Open a pull request\" form for"
+              echo "\`$branch\`. Create it, let the checks go green, and merge."
+              echo ""
+              echo "Two files are in the branch:"
+              echo ""
+              echo "- \`review/list-1-physical-irving.csv\` — coordinates, which geocoder answered, and an \`In Irving\` column"
+              echo "- \`review/list-1-geocoded.js\` — listing objects to paste into \`resources\` in \`directory-data.js\`"
+            fi
+            echo ""
+            if [ "${{ steps.geocode.outcome }}" = "failure" ]; then
+              echo "> [!WARNING]"
+              echo "> One or more addresses missed, or landed outside the Irving city limits."
+              echo "> Whatever did resolve is still here. Check the \`In Irving\` column for"
+              echo "> any row reading \`NO - CHECK\`, and the step log for addresses that missed."
+            else
+              echo "> [!NOTE]"
+              echo "> Every address geocoded, and every result landed inside the Irving city limits."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
           if [ "${{ steps.geocode.outcome }}" = "failure" ]; then
-            echo "::warning::One or more addresses missed or landed outside the Irving boundary."
-            echo "Coordinates that did resolve were still committed. Check the 'In Irving' column"
-            echo "in review/list-1-physical-irving.csv and the log above for which ones need a look."
-          else
-            echo "All addresses geocoded inside the Irving city limits."
+            echo "::warning::Some addresses missed or landed outside the Irving boundary — see the run summary."
           fi
