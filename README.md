@@ -51,6 +51,7 @@ README.md, netlify.toml, .github/
 | `directory-data.js` | **Single source of truth** for all listings, categories, and the Irving boundary |
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
+| `images/church-of-the-incarnation-*.jpg` | Hero + 3 gallery photos for that listing, supplied by the owner |
 | `contact.html` | Contact form → Netlify Forms (`contact`) |
 | `suggest.html` | Suggest-a-listing form → Netlify Forms (`suggest-a-listing`) |
 | `update.html` | Update-a-listing form → Netlify Forms (`update-a-listing`) |
@@ -350,9 +351,10 @@ us button — followed by the same footer as the homepage. Both mirrored into
 
 ## Known gaps / the actual work queue
 In roughly the owner's priority order:
-1. **Photos.** Every `heroPhoto` is still `null`, so detail pages show a "Photo coming soon" box.
-   Plan is to request images from the parishes and schools directly and shoot exteriors otherwise.
-   The resizing half of that is now a solved step — `tools/process-photos.mjs`, see
+1. **Photos.** `church-of-the-incarnation` is the first listing with real photos; every other
+   `heroPhoto` is still `null`, so those detail pages show a "Photo coming soon" box. Plan is to
+   request images from the parishes and schools directly and shoot exteriors otherwise. The
+   resizing half of that is a solved step — `tools/process-photos.mjs`, see
    [Adding photos to a listing](#adding-photos-to-a-listing) — so what is left is sourcing. Worth
    building a better photoless fallback — a category-colored card with the listing's initial —
    since new listings will always start without a photo.
@@ -397,7 +399,7 @@ Deployed (`site/`):
 - `index.html`, `listing.html` — the two main pages
 - `contact.html`, `suggest.html`, `update.html`, `thanks.html` — the form pages
 - `forms.css`, `forms.js` — shared by the four form pages
-- `directory-data.js`, `support.js`, `seo.js`, `images/blessed-virgin.jpg`
+- `directory-data.js`, `support.js`, `seo.js`, `images/`
 - `robots.txt`, `sitemap.xml`, `favicon.svg`
 
 Not deployed:
