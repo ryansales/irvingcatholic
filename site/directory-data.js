@@ -295,7 +295,7 @@ window.IRVING_DIRECTORY = {
       "lat": 32.846152,
       "lng": -96.921164,
       "blurb": "Cistercian-served Catholic church at the heart of the University of Dallas.",
-      "description": "The Church of the Incarnation serves the University of Dallas community and neighbors, staffed by monks of the Cistercian Abbey of Our Lady of Dallas. Elevated from chapel to church in 2001, its award-winning modernist architecture and reverent liturgies anchor campus faith life. It houses the St. Thomas Aquinas reliquary chapel.",
+      "description": "The Church of the Incarnation serves the University of Dallas students, faculty and staff. Elevated from chapel to church in 2001, its award-winning modernist architecture and reverent liturgies anchor campus faith life. It houses the St. Thomas Aquinas reliquary chapel.",
       "phone": "(972) 721-5375",
       "website": "udallas.edu/life-at-ud/church-of-the-incarnation",
       "hours": "Open daily; weekday adoration 1-5pm (academic year)",
