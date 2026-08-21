@@ -284,7 +284,7 @@ window.IRVING_DIRECTORY = {
         "Sat 8:30am"
       ],
       "heroPhoto": null,
-      "photoCredit": null,
+      "photoCredit": "Mater Dei Parish",
       "gallery": []
     },
     {
