@@ -305,7 +305,7 @@ window.IRVING_DIRECTORY = {
         "Mon-Fri 12:05pm & 5pm (academic year)"
       ],
       "heroPhoto": "images/church-of-the-incarnation-hero.jpg",
-      "photoCredit": null,
+      "photoCredit": "Church of the Incarnation",
       "gallery": [
         "images/church-of-the-incarnation-1.jpg",
         "images/church-of-the-incarnation-2.jpg",
