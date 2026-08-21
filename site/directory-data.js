@@ -304,9 +304,13 @@ window.IRVING_DIRECTORY = {
         "Sun 9am, 11am, 7pm",
         "Mon-Fri 12:05pm & 5pm (academic year)"
       ],
-      "heroPhoto": null,
-      "photoCredit": null,
-      "gallery": []
+      "heroPhoto": "images/church-of-the-incarnation-hero.jpg",
+      "photoCredit": "Church of the Incarnation",
+      "gallery": [
+        "images/church-of-the-incarnation-1.jpg",
+        "images/church-of-the-incarnation-2.jpg",
+        "images/church-of-the-incarnation-3.jpg"
+      ]
     },
     {
       "id": "st-basil-the-great-byzantine",

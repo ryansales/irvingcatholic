@@ -1,0 +1,12 @@
+{
+  "name": "irving-catholic-tools",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Maintainer scripts run by hand. Kept out of the repo root on purpose: netlify.toml publishes site/ with no build command, and a root package.json would make Netlify start installing dependencies on every deploy. Nothing here runs in CI or at deploy time. No \"type\" field: generate-sitemap.js is CommonJS and must stay that way; process-photos.mjs is ESM by extension.",
+  "scripts": {
+    "photos": "node process-photos.mjs"
+  },
+  "devDependencies": {
+    "sharp": "0.35.3"
+  }
+}

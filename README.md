@@ -38,7 +38,7 @@ design/     .dc.html design sources + image-slot.js  (never deployed)
 docs/       todo.md and future notes                 (never deployed)
 scripts/    data and static checks (CI)              (never deployed)
 tests/      browser tests                            (never deployed)
-tools/      generate-sitemap.js                      (never deployed)
+tools/      generate-sitemap.js, process-photos.mjs  (never deployed)
 review/     raw research lists behind the listings   (never deployed)
 README.md, netlify.toml, .github/
 ```
@@ -51,6 +51,7 @@ README.md, netlify.toml, .github/
 | `directory-data.js` | **Single source of truth** for all listings, categories, and the Irving boundary |
 | `support.js` | Small runtime that renders the templated markup in the two HTML files. Do not hand-edit |
 | `images/blessed-virgin.jpg` | Devotional engraving behind the intro copy (public domain) |
+| `images/church-of-the-incarnation-*.jpg` | Hero + 3 gallery photos for that listing, supplied by the owner |
 | `contact.html` | Contact form → Netlify Forms (`contact`) |
 | `suggest.html` | Suggest-a-listing form → Netlify Forms (`suggest-a-listing`) |
 | `update.html` | Update-a-listing form → Netlify Forms (`update-a-listing`) |
@@ -74,6 +75,8 @@ checkout and 404s in production, so `scripts/check-static.mjs` fails the build o
 | `docs/todo.md` | SEO work queue — open suggestions in priority order, plus what already shipped |
 | `netlify.toml` | `publish = "site"` and a 301 from `www` to the bare domain. That is nearly all it needs to say now |
 | `tools/generate-sitemap.js` | Regenerates `site/sitemap.xml`. Run by hand; **not** a build step |
+| `tools/process-photos.mjs` | Resizes owner-supplied photos into `site/images/`. Run by hand; **not** a build step |
+| `tools/package.json` | `sharp`, for the line above. Deliberately **not** at the repo root — a root `package.json` would make Netlify start installing dependencies on every deploy |
 
 **`image-slot.js` must not come back into a deployed page.** It is a 65KB drag-and-drop editor
 whose whole point is design-time editing. In production `window.omelette` is absent, so it renders
@@ -163,6 +166,42 @@ which rewrites the committed `sitemap.xml`.
 A listing carrying `placeholder: true` is treated as not-yet-real: it is left out of `sitemap.xml`
 and its detail page is served `noindex`. Drop the flag when a real business replaces it.
 
+### Adding photos to a listing
+`heroPhoto` and `gallery` are the only fields that need a file on disk rather than a string, so
+they are the only ones with a step in front of the edit. `tools/process-photos.mjs` does that step:
+
+```
+cd tools && npm install                    # once — installs sharp, gitignored
+node tools/process-photos.mjs --id church-of-the-incarnation \
+  banner.jpg interior.jpg font.jpg elevation.jpg
+```
+
+First path is the hero, the next three are the gallery. It writes `site/images/<id>-hero.jpg` and
+`<id>-1.jpg`…`-3.jpg`, then prints the exact `heroPhoto`/`gallery` lines to paste into the listing.
+Sizes come from what `listing.html` actually paints, at 2x:
+
+| | Stored size | Why |
+| --- | --- | --- |
+| Hero | 1600×900 | The band is ~984×340 (2.89:1), but `heroPhoto` is also what `seo.js` hands to `og:image`, and 1600×900 clears Facebook's 1200×630 floor |
+| Gallery | 800×600 | Tiles are `aspect-ratio:4/3` at ~200×150 in the 624px main column |
+
+Two things worth knowing before choosing a crop:
+
+- **The browser crops the hero again.** The stored file is 16:9; the band it fills is 2.89:1. Only
+  the middle ~61% of the image's height survives on a desktop detail page, so the subject needs to
+  sit near the vertical centre — a crucifix at the very top of the frame will be cut off.
+- **Portraits lose a lot.** A phone portrait squeezed into a 4:3 tile drops most of its height.
+  Append `:top`, `:bottom`, `:left`, `:right` or `:attention` to a path to steer that crop —
+  `interior.jpg:top` — instead of accepting the centre.
+
+The script bakes in EXIF orientation (so phone portraits do not land sideways) and strips all
+metadata on the way out — these are photographs of identifiable people in a parish, and camera
+GPS should not ship with them. It refuses to write anything unless every source reads cleanly, so
+a typo in the fourth path cannot leave a listing two-thirds updated.
+
+`scripts/validate-data.mjs` fails if a `heroPhoto` or `gallery` entry points at a file that is not
+in the repo, so run it after the edit.
+
 Current contents: **27 listings** — 6 churches, 6 schools, 3 religious/seminaries, 5 ministries,
 3 Catholic businesses, 4 Catholic owned; 3 of those are online-only and are clearly marked
 `EXAMPLE ONLINE LISTING` in their descriptions (placeholders to be replaced with real businesses).
@@ -212,6 +251,9 @@ carries over anything already typed, so a submission with photos attached is equ
 Each form takes one **banner** photo (16:9, becomes `heroPhoto`) and up to **three** smaller ones
 (4:3, become `gallery[0..2]`) — matching exactly what `listing.html` renders. Drag-and-drop with
 thumbnail previews, capped at 5 MB per file, with the email route offered for anything larger.
+
+Submissions arrive at whatever size the sender's phone produced, so they are resized before they
+are committed — see [Adding photos to a listing](#adding-photos-to-a-listing).
 
 ### One-time setup outside this repo
 Netlify Forms notifications are configured in the Netlify UI, not in `netlify.toml`. For submissions
@@ -309,8 +351,11 @@ us button — followed by the same footer as the homepage. Both mirrored into
 
 ## Known gaps / the actual work queue
 In roughly the owner's priority order:
-1. **Photos.** Every `heroPhoto` is `null`, so detail pages show a "Photo coming soon" box. Plan is
-   to request images from the parishes and schools directly and shoot exteriors otherwise. Worth
+1. **Photos.** `church-of-the-incarnation` is the first listing with real photos; every other
+   `heroPhoto` is still `null`, so those detail pages show a "Photo coming soon" box. Plan is to
+   request images from the parishes and schools directly and shoot exteriors otherwise. The
+   resizing half of that is a solved step — `tools/process-photos.mjs`, see
+   [Adding photos to a listing](#adding-photos-to-a-listing) — so what is left is sourcing. Worth
    building a better photoless fallback — a category-colored card with the listing's initial —
    since new listings will always start without a photo.
 2. **Featured supporters.** A framework exists in the design explorations (category colors, pin
@@ -343,6 +388,9 @@ In roughly the owner's priority order:
 - `site/images/blessed-virgin.jpg` — 418×512 engraving of Saint Mary the Blessed Virgin, public
   domain, supplied by the owner. Used only as the intro band, as a plain `<img>` with
   `object-fit: contain` inside a masked, `multiply`-blended wrapper.
+- `site/images/<listing-id>-hero.jpg` (1600×900) and `<listing-id>-1..3.jpg` (800×600) — listing
+  photos, produced by `tools/process-photos.mjs` from originals the owner or the parish supplied.
+  Metadata is stripped; the originals are not kept in the repo.
 - No icon set; the few glyphs in the UI are text characters.
 - Fonts load from Google Fonts; Leaflet and Leaflet.markercluster load from unpkg. Nothing is bundled.
 
@@ -351,10 +399,12 @@ Deployed (`site/`):
 - `index.html`, `listing.html` — the two main pages
 - `contact.html`, `suggest.html`, `update.html`, `thanks.html` — the form pages
 - `forms.css`, `forms.js` — shared by the four form pages
-- `directory-data.js`, `support.js`, `seo.js`, `images/blessed-virgin.jpg`
+- `directory-data.js`, `support.js`, `seo.js`, `images/`
 - `robots.txt`, `sitemap.xml`, `favicon.svg`
 
 Not deployed:
+- `tools/generate-sitemap.js`, `tools/process-photos.mjs`, `tools/package.json` — maintainer
+  scripts, both run by hand
 - `design/Home.dc.html`, `design/Resource Detail.dc.html`, `design/image-slot.js` — design sources
 - `docs/todo.md` — the SEO work queue
 - `review/` — the raw research lists the listings were built from. Some of it is contact
