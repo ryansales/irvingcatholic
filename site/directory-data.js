@@ -294,7 +294,7 @@ window.IRVING_DIRECTORY = {
       "address": "1845 E Northgate Dr, Irving, TX 75062",
       "lat": 32.846152,
       "lng": -96.921164,
-      "blurb": "Cistercian-served Catholic church at the heart of the University of Dallas.",
+      "blurb": "Catholic church serving University of Dallas students, faculty and staff.",
       "description": "The Church of the Incarnation serves the University of Dallas students, faculty and staff. Elevated from chapel to church in 2001, its award-winning modernist architecture and reverent liturgies anchor campus faith life. It houses the St. Thomas Aquinas reliquary chapel.",
       "phone": "(972) 721-5375",
       "website": "udallas.edu/life-at-ud/church-of-the-incarnation",
