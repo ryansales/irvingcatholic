@@ -283,9 +283,13 @@ window.IRVING_DIRECTORY = {
         "Fri 12:15pm & 6pm",
         "Sat 8:30am"
       ],
-      "heroPhoto": null,
+      "heroPhoto": "images/mater-dei-latin-mass-parish-hero.jpg",
       "photoCredit": "Mater Dei Parish",
-      "gallery": []
+      "gallery": [
+        "images/mater-dei-latin-mass-parish-1.jpg",
+        "images/mater-dei-latin-mass-parish-2.jpg",
+        "images/mater-dei-latin-mass-parish-3.jpg"
+      ]
     },
     {
       "id": "church-of-the-incarnation",
@@ -510,8 +514,8 @@ window.IRVING_DIRECTORY = {
       "phone": "(972) 793-0484",
       "website": "materdeiparish.com",
       "hours": "Tue-Fri 12:30-5:30pm, Sat 9am-12pm, Sun after Masses",
-      "heroPhoto": null,
-      "photoCredit": null,
+      "heroPhoto": "images/mater-dei-bookstore-hero.jpg",
+      "photoCredit": "Mater Dei Parish",
       "gallery": []
     },
     {
